@@ -1,30 +1,82 @@
 import { useState } from "react";
 import RestaurantCard from "./RestaurantCard";
 
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from "@/components/ui/carousel"
+
 // demo du lieu
 const restaurants = [
     {
-        id:1,
-        name: "Nhà hàng A",
-        imageUrl: "/img/restaurant.png",
-        locationUrl: "ABC XYZ",
-        districtId: "thu-duc"
+        imageUrl: "https://noithattruongsa.com/wp-content/uploads/2020/11/mau-thiet-ke-quan-an-sang-binh-dan-dep-15-Hang-Noi-That-Truong-Sa.jpg",
+        name: "Quán A",
+        locationUrl: "https://maps.google.com/?q=10.762622,106.660172",
+        districtId: "quan-9",
+        menu: [
+            {
+                food: {
+                    name: "Cơm hải sản",
+                    description: "Cơm chiên cùng tôm, mực và rau củ tươi ngon.",
+                    imgUrl: "https://danviet.ex-cdn.com/files/f1/2020/8/31/image4-1598431030-68-width605height416-1598810316509-15988103165132025318295.png"
+                },
+                price: 75000
+            },
+            {
+                food: {
+                    name: "Lẩu Thái chua cay",
+                    description: "Nước lẩu đậm đà kết hợp tôm, mực và rau tươi.",
+                    imgUrl: "https://i-giadinh.vnecdn.net/2022/12/17/Thanh-pham-1-1-5372-1671269525.jpg"
+                },
+                price: 120000
+            },
+            {
+                food: {
+                    name: "Gỏi xoài tôm khô",
+                    description: "Gỏi xoài xanh kết hợp tôm khô, đậu phộng và rau thơm.",
+                    imgUrl: "https://cdn.tgdd.vn/2020/06/CookProduct/1-1200x675-3.jpg"
+                },
+                price: 45000
+            },
+        ]
     },
     {
-        id:2,
-        name: "Nhà hàng B",
-        imageUrl: "/img/restaurant.png",
-        locationUrl: "ABC XYZ",
-        districtId: "quan-9"
+        imageUrl: "https://noithattruongsa.com/wp-content/uploads/2020/11/mau-thiet-ke-quan-an-sang-binh-dan-dep-15-Hang-Noi-That-Truong-Sa.jpg",
+        name: "Quán A",
+        locationUrl: "https://maps.google.com/?q=10.762622,106.660172",
+        districtId: "quan-9",
+        menu: [
+            {
+                food: {
+                    name: "Cơm hải sản",
+                    description: "Cơm chiên cùng tôm, mực và rau củ tươi ngon.",
+                    imgUrl: "https://danviet.ex-cdn.com/files/f1/2020/8/31/image4-1598431030-68-width605height416-1598810316509-15988103165132025318295.png"
+                },
+                price: 75000
+            },
+            {
+                food: {
+                    name: "Lẩu Thái chua cay",
+                    description: "Nước lẩu đậm đà kết hợp tôm, mực và rau tươi.",
+                    imgUrl: "https://i-giadinh.vnecdn.net/2022/12/17/Thanh-pham-1-1-5372-1671269525.jpg"
+                },
+                price: 120000
+            },
+            {
+                food: {
+                    name: "Gỏi xoài tôm khô",
+                    description: "Gỏi xoài xanh kết hợp tôm khô, đậu phộng và rau thơm.",
+                    imgUrl: "https://cdn.tgdd.vn/2020/06/CookProduct/1-1200x675-3.jpg"
+                },
+                price: 45000
+            },
+        ]
     },
-        {
-        id:3,
-        name: "Nhà hàng C",
-        imageUrl: "/img/restaurant.png",
-        locationUrl: "ABC XYZ",
-        districtId: "quan-9"
-    }
-]
+];
+
 
 
 
@@ -49,7 +101,7 @@ const HCMMap = () => {
     return (
         <div>
         <span className="lg:w-2/3 sm:w-screen">
-            <div className="flex items-center lg:h-screen">
+            <div className="flex items-center lg:h-1/2">
                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="960" height="540"  viewBox="0 0 960 540">
 
                 {/* Quận 9 */}
@@ -209,20 +261,30 @@ const HCMMap = () => {
 
                 {/* Nhà hàng hiển thị theo quận */}
                 {selectedDistrict && (
-                    <div className="flex flex-col justify-center ml-24">
+                    <div className="mt-4 flex flex-col justify-center mx-6">
                         <h2 className="text-2xl font-bold mb-4">
                             {selectedDistrict.name}
                         </h2>
-                        {filteredRestaurants.map((restaurant) => (
-                            <RestaurantCard
-                            key={restaurant.id}
-                            name={restaurant.name}
-                            imageUrl={restaurant.imageUrl}
-                            locationUrl={restaurant.locationUrl}
-                            />
-                        ))}
+                        <Carousel>
+                            <CarouselContent>
+                                
+                                    {filteredRestaurants.map((restaurant, index) => (
+                                        <CarouselItem key={restaurant.id || index}>
+                                                <div href={restaurant.locationUrl}>
+                                                    <RestaurantCard
+                                                        name={restaurant.name}
+                                                        imageUrl={restaurant.imageUrl}
+                                                        menu={restaurant.menu}
+                                                    />
+                                                </div>
+                                        </CarouselItem>
+                                    ))}
+                            </CarouselContent>
+                        </Carousel>
                     </div>
                 )}
+
+
             </div>
         </span>
         </div>

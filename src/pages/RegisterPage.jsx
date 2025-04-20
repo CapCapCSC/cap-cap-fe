@@ -11,6 +11,7 @@ const RegisterPage = () => {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPasword, setConfirmPassword] = useState("");
 
     return (
         <div>
@@ -22,7 +23,9 @@ const RegisterPage = () => {
                     email={email}
                     setEmail={setEmail}
                     password={password}
-                    setPassword={setPassword} />
+                    setPassword={setPassword}
+                    confirmPasword={confirmPasword}
+                    setConfirmPassword={setConfirmPassword}/>
             </div>
             <Toaster />
         </div>
