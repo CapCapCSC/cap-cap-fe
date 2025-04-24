@@ -50,7 +50,7 @@ export function AuthenticatedNavbar() {
     }, [isProfileOpen]);
 
     return (
-        <nav className="bg-red-700 fixed w-full z-20 top-0 start-0 border-b border-[#F9AD2F]">
+        <nav className="bg-red-700 fixed w-full z-50 top-0 start-0 border-b border-[#F9AD2F]">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             {/* Logo */}
             <a href="/" className="flex items-center space-x-3">
@@ -213,7 +213,7 @@ export default function Navbar() {
     const navigate = useNavigate();
 
     return (
-        <nav className="bg-red-700 fixed w-full z-20 top-0 start-0 border-b border-[#F9AD2F]">
+        <nav className="bg-red-700 fixed w-full z-50 top-0 start-0 border-b border-[#F9AD2F]">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             {/* Logo */}
             <a href="/" className="flex items-center space-x-3">

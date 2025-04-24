@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { MapPin, ExternalLink } from "lucide-react";
 
 const RestaurantCard = ({ imageUrl, name, locationUrl, menu, restaurantId }) => {
     const navigate = useNavigate();
@@ -13,57 +14,63 @@ const RestaurantCard = ({ imageUrl, name, locationUrl, menu, restaurantId }) => 
     };
     
     return (
-        <div className="max-w-4xl mx-auto my-4">
-            <div className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm md:flex-row ">
-                <div
-                    className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm max-w-xl hover:bg-gray-50 cursor-pointer" 
-                    onClick={handleRestaurantClick}
-                    >
+        <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            <div 
+                className="cursor-pointer" 
+                onClick={handleRestaurantClick}
+            >
+                {/* Restaurant image and info */}
+                <div className="relative">
                     <img
-                        className="object-cover w-full rounded-t-lg h-96"
+                        className="object-cover w-full h-40 sm:h-48"
                         src={imageUrl}
                         alt={name}
                     />
-                    <div className="flex flex-col justify-start p-4 w-full text-left">
-                        <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">{name}</h5>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 p-3 text-white">
+                        <h3 className="text-lg font-bold">{name}</h3>
                         <a
-                        href={locationUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 dark:text-blue-400 hover:underline mb-4"
-                        onClick={(e) => e.stopPropagation()} // Prevent triggering restaurant click
+                            href={locationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs flex items-center text-white/80 hover:text-white mt-1"
+                            onClick={(e) => e.stopPropagation()}
                         >
-                        Xem địa điểm trên bản đồ
+                            <MapPin className="h-3 w-3 mr-1" />
+                            <span>Xem trên bản đồ</span>
+                            <ExternalLink className="h-3 w-3 ml-1" />
                         </a>
                     </div>
                 </div>
 
-                <div className="flex flex-col justify-between p-4 leading-normal w-full">
-                    <div>
-                        <h6 className="text-lg font-semibold mb-2 text-gray-800">Món ăn nổi bật</h6>
-                        <ul className="space-y-4">
-                            {menu.slice(0, 3).map((item, index) => (
-                                <li 
-                                    key={index} 
-                                    className="flex items-start space-x-4 hover:bg-red-200 cursor-pointer p-2 rounded-md transition-colors"
-                                    onClick={(e) => handleFoodClick(item.food.id || index + 1, e)}
-                                >
-                                    <img
-                                        src={item.food.imgUrl}
-                                        alt={item.food.name}
-                                        className="w-24 h-24 object-cover rounded"
-                                    />
-                                    <div>
-                                        <h6 className="text-md font-medium text-gray-900 ">{item.food.name}</h6>
-                                        <p className="text-sm text-gray-600 ">{item.food.description}</p>
-                                        <p className="text-sm font-semibold text-red-600 mt-1">
-                                            {item.price.toLocaleString('vi-VN')}₫
-                                        </p>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                {/* Menu items */}
+                <div className="p-3">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                        <span className="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5"></span>
+                        Món ăn nổi bật
+                    </h4>
+                    <ul className="space-y-2">
+                        {menu.slice(0, 2).map((item, index) => (
+                            <li 
+                                key={index} 
+                                className="flex items-center space-x-2 p-1.5 rounded-md hover:bg-red-50 transition-colors cursor-pointer"
+                                onClick={(e) => handleFoodClick(item.food.id || index + 1, e)}
+                            >
+                                <img
+                                    src={item.food.imgUrl}
+                                    alt={item.food.name}
+                                    className="w-14 h-14 object-cover rounded"
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <h5 className="text-sm font-medium text-gray-800 truncate">{item.food.name}</h5>
+                                    <p className="text-xs text-gray-500 line-clamp-1">{item.food.description}</p>
+                                    <p className="text-xs font-semibold text-red-600 mt-0.5">
+                                        {item.price.toLocaleString('vi-VN')}₫
+                                    </p>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             </div>
         </div>

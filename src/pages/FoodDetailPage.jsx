@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 // import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ChevronLeft, Tag, Clock } from "lucide-react";
 
 // Dữ liệu mẫu (giống trong FoodListPage)
 const sampleFoods = [
@@ -16,9 +17,9 @@ const sampleFoods = [
 const FoodDetailPage = () => {
   const { id } = useParams();
   const [food, setFood] = useState(null);
-  // const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState(null);
-
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  
   useEffect(() => {
     // Khi backend hoàn thành, bỏ comment và sử dụng axios:
     // setLoading(true);
@@ -35,43 +36,113 @@ const FoodDetailPage = () => {
     // Dùng dữ liệu mẫu tạm:
     const found = sampleFoods.find(item => item._id === id);
     setFood(found || null);
+    setLoading(false);
   }, [id]);
 
-  // if (loading) return <p>Đang tải dữ liệu...</p>;
-  // if (error) return <p>Lỗi: {error}</p>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+          <p>Đang tải thông tin món ăn...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!food) {
-    return <p className="text-center mt-20">Không tìm thấy món ăn.</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center p-6 bg-white rounded-xl shadow-md max-w-md">
+          <div className="text-red-500 text-5xl mb-4">😕</div>
+          <h2 className="text-2xl font-bold mb-2">Không tìm thấy món ăn</h2>
+          <p className="text-gray-600 mb-6">Món ăn bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Quay lại trang trước
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <div className="mt-24 px-4">
-        <h1 className="text-3xl font-bold text-center">{food.name}</h1>
-        <div className="flex flex-col md:flex-row items-center mt-8 gap-8">
-          <img
-            src={food.imgUrl}
-            alt={food.name}
-            className="w-full md:w-1/2 h-64 object-cover rounded"
-          />
-          <div className="md:ml-8">
-            <p className="text-gray-600">{food.description}</p>
-
-            <h3 className="text-lg font-bold mt-4">Nguyên liệu:</h3>
-            <ul className="list-disc list-inside mt-1">
-              {food.ingredients.map((ing, idx) => (
-                <li key={idx}>{ing}</li>
-              ))}
-            </ul>
-
-            <h3 className="text-lg font-bold mt-4">Tags:</h3>
-            <ul className="list-disc list-inside mt-1">
-              {food.tags.map((tag, idx) => (
-                <li key={idx}>{tag}</li>
-              ))}
-            </ul>
+    <div className="min-h-screen bg-gray-50 pb-16">
+      {/* Back navigation */}
+      <div className="bg-white sticky top-0 z-50 border-b">
+        <div className="container mx-auto max-w-6xl px-4 py-3 flex items-center">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="flex items-center text-gray-700 hover:text-red-600 transition-colors"
+          >
+            <ChevronLeft className="h-5 w-5 mr-1" />
+            <span>Quay lại</span>
+          </button>
+        </div>
+      </div>
+      
+      {/* Hero section */}
+      <div className="relative h-64 md:h-80 overflow-hidden">
+        <img 
+          src={food.imgUrl} 
+          alt={food.name} 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-10">
+          <div className="container mx-auto max-w-6xl">
+            <h1 className="text-4xl font-bold mb-3 drop-shadow-lg">{food.name}</h1>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              {food.tags && food.tags.length > 0 && (
+                <div className="flex items-center gap-2">
+                  {food.tags.map((tag, index) => (
+                    <span 
+                      key={index} 
+                      className="bg-black/30 px-3 py-1 rounded-full text-sm flex items-center"
+                    >
+                      <Tag className="h-3 w-3 mr-1" />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
+      </div>
+      
+      {/* Food info */}
+      <div className="container mx-auto max-w-6xl px-4 mt-8">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div className="p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Chi tiết món ăn</h2>
+            <p className="text-gray-700 mb-6 leading-relaxed">{food.description}</p>
+            
+            <h3 className="text-lg font-semibold mb-3 flex items-center text-gray-800">
+              <Clock className="h-5 w-5 mr-2 text-red-500" />
+              Nguyên liệu
+            </h3>
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+              <div className="flex flex-wrap gap-2">
+                {food.ingredients.map((ingredient, index) => (
+                  <span key={index} className="bg-white px-3 py-1 rounded-full text-sm border border-gray-200">
+                    {ingredient}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-center">
+              <button className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center">
+                Đặt món này
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Related foods - could be added here */}
       </div>
     </div>
   );

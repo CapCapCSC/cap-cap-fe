@@ -14,6 +14,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import FoodListPage from './pages/FoodListPage.jsx';
 import FoodDetailPage from './pages/FoodDetailPage.jsx'; 
 import ProfilePage from './pages/ProfilePage.jsx';
+import MapPage from './pages/MapPage.jsx';
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
           <NavbarSelector />
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/map" element={<HomePage />} />
+            <Route path="/map" element={<MapPage />} />
 
             {/* Authentication */}
             <Route path="/login" element={<LoginPage />} />
