@@ -298,7 +298,7 @@ const ProfilePage = () => {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <div className="mt-32 max-w-screen-xl mx-auto px-4 w-full -mt-14">
+            <div className="mt-32 max-w-screen-xl mx-auto px-4 w-full ">
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Profile info card */}
                     <div className="bg-white rounded-lg shadow-md p-6 w-full md:w-1/3 border border-gray-100">
@@ -389,7 +389,7 @@ const ProfilePage = () => {
             
             {/* Avatar change modal - only accessible to authenticated users */}
             {isAvatarModalOpen && isCurrentUser && (
-                <div className="fixed inset-0 bg-gray-500/0 bg-gray-500/30 backdrop-blur-sm  flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-gray-500/30 backdrop-blur-sm  flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full">
                         <h3 className="text-xl font-medium mb-4">Đổi avatar</h3>
                         
@@ -440,7 +440,7 @@ const ProfilePage = () => {
             
             {/* Badge modal */}
             {isBadgeModalOpen && selectedBadge && (
-                <div className="fixed inset-0 bg-gray-500/0 bg-gray-500/30 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="fixed inset-0  bg-gray-500/30 backdrop-blur-sm flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-xl font-medium">{selectedBadge.name}</h3>
