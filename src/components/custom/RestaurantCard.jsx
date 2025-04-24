@@ -1,13 +1,23 @@
 import { useNavigate } from "react-router-dom";
 
-const RestaurantCard = ({ imageUrl, name, locationUrl, menu }) => {
+const RestaurantCard = ({ imageUrl, name, locationUrl, menu, restaurantId }) => {
     const navigate = useNavigate();
+    
+    const handleFoodClick = (foodId, event) => {
+        event.stopPropagation(); // Prevent triggering parent onClick
+        navigate(`/foods/${foodId}`);
+    };
+    
+    const handleRestaurantClick = () => {
+        navigate(`/restaurants/${restaurantId || 1}`);
+    };
+    
     return (
         <div className="max-w-4xl mx-auto my-4">
             <div className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm md:flex-row ">
                 <div
-                    href="#"
-                    className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm max-w-xl hover:bg-gray-50 cursor-pointer" onClick={() => navigate("/restaurants/1")}
+                    className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm max-w-xl hover:bg-gray-50 cursor-pointer" 
+                    onClick={handleRestaurantClick}
                     >
                     <img
                         className="object-cover w-full rounded-t-lg h-96"
@@ -21,6 +31,7 @@ const RestaurantCard = ({ imageUrl, name, locationUrl, menu }) => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 dark:text-blue-400 hover:underline mb-4"
+                        onClick={(e) => e.stopPropagation()} // Prevent triggering restaurant click
                         >
                         Xem địa điểm trên bản đồ
                         </a>
@@ -32,7 +43,11 @@ const RestaurantCard = ({ imageUrl, name, locationUrl, menu }) => {
                         <h6 className="text-lg font-semibold mb-2 text-gray-800">Món ăn nổi bật</h6>
                         <ul className="space-y-4">
                             {menu.slice(0, 3).map((item, index) => (
-                                <li key={index} className="flex items-start space-x-4 hover:bg-red-200 cursor-pointer">
+                                <li 
+                                    key={index} 
+                                    className="flex items-start space-x-4 hover:bg-red-200 cursor-pointer p-2 rounded-md transition-colors"
+                                    onClick={(e) => handleFoodClick(item.food.id || index + 1, e)}
+                                >
                                     <img
                                         src={item.food.imgUrl}
                                         alt={item.food.name}

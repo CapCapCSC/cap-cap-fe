@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 // import axios from "axios";
-import Navbar from "@/components/custom/Navbar";
 import FoodCard from "@/components/custom/FoodCard";
 import { Link } from "react-router-dom";
 
@@ -100,7 +99,6 @@ const FoodListPage = () => {
 
   return (
     <div>
-      <Navbar />
       <div className="mt-32 px-8 py-6">
         <h1 className="text-5xl text-center font-lobster mb-8 text-red-600">
           Danh sách món ăn

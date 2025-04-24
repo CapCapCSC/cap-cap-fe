@@ -1,8 +1,6 @@
-
-
 const FoodCard = ({name, description, ingredients, imgUrl, tags, price}) => {
     return (
-        <div className="border border-red-300 rounded-lg shadow-md p-4">
+        <div className="border border-red-300 rounded-lg shadow-md p-4 hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:-translate-y-1">
             <img
             src={imgUrl}
             alt={name}
@@ -30,7 +28,7 @@ const FoodCard = ({name, description, ingredients, imgUrl, tags, price}) => {
 
             {/* Giá */}
             {price && (
-                <span className="font-semibold text-red-500">{price}</span>
+                <span className="font-semibold text-red-500">{price.toLocaleString('vi-VN')} đ</span>
             )}
             </div>
         </div>

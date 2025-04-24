@@ -1,39 +1,52 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { NavbarProvider } from "./context/NavbarContext.jsx";
+import NavbarSelector from './components/NavbarSelector.jsx';
 
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage'; 
 import RestaurantListPage from './pages/RestaurantListPage.jsx';
 import RestaurantPage from './pages/RestaurantPage.jsx';
-
+import NotFoundPage from './pages/NotFoundPage';
 import FoodListPage from './pages/FoodListPage.jsx';
-import FoodDetailPage from './pages/FoodDetailPage.jsx';  
+import FoodDetailPage from './pages/FoodDetailPage.jsx'; 
+import ProfilePage from './pages/ProfilePage.jsx';
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/map" element={<HomePage />} />
+      <AuthProvider>
+        <NavbarProvider>
+          <NavbarSelector />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/map" element={<HomePage />} />
 
-        {/* Authentication */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            {/* Authentication */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
-        {/* Restaurant */}
-        <Route path="/restaurants" element={<RestaurantListPage />} />
-        <Route path="/restaurants/:id" element={<RestaurantPage />} />
+            {/* Restaurant */}
+            <Route path="/restaurants" element={<RestaurantListPage />} />
+            <Route path="/restaurants/:id" element={<RestaurantPage />} />
 
-        {/* Foods */}
-        <Route path="/foods" element={<FoodListPage />} />
-        {/* <Route path="/restaurants/:id/foods" element={<FoodListPage />} />*/}
-        <Route path="/foods/:id" element={<FoodDetailPage />} />
+            {/* Foods */}
+            <Route path="/foods" element={<FoodListPage />} />
+            <Route path="/foods/:id" element={<FoodDetailPage />} />
+            
+            {/* Profile */}
+            <Route path="/profiles/:id" element={<ProfilePage />} />
 
-        {/* 404 */}
-      </Routes>
+            {/* 404 */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </NavbarProvider>
+      </AuthProvider>
     </Router>
   );
 }

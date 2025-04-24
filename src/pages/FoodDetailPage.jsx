@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 // import axios from "axios";
 import { useParams } from "react-router-dom";
-import Navbar from "@/components/custom/Navbar";
 
 // Dữ liệu mẫu (giống trong FoodListPage)
 const sampleFoods = [
@@ -47,7 +46,6 @@ const FoodDetailPage = () => {
 
   return (
     <div>
-      <Navbar />
       <div className="mt-24 px-4">
         <h1 className="text-3xl font-bold text-center">{food.name}</h1>
         <div className="flex flex-col md:flex-row items-center mt-8 gap-8">

@@ -1,6 +1,7 @@
 import FoodCard from "@/components/custom/FoodCard";
 import Navbar from "@/components/custom/Navbar";
 import SearchBar from "@/components/custom/SearchBar";
+import { Link } from "react-router-dom";
 
 import { IoLocationSharp } from "react-icons/io5";
 
@@ -12,6 +13,7 @@ const restaurant = {
     districtId: "quan-9",
     menu: [
         {
+            id: "1",
             food: {
                 name: "Cơm hải sản",
                 description: "Cơm chiên cùng tôm, mực và rau củ tươi ngon.",
@@ -20,6 +22,7 @@ const restaurant = {
             price: 75000
         },
         {
+            id: "2",
             food: {
                 name: "Lẩu Thái chua cay",
                 description: "Nước lẩu đậm đà kết hợp tôm, mực và rau tươi.",
@@ -28,6 +31,7 @@ const restaurant = {
             price: 120000
         },
         {
+            id: "3",
             food: {
                 name: "Gỏi xoài tôm khô",
                 description: "Gỏi xoài xanh kết hợp tôm khô, đậu phộng và rau thơm.",
@@ -36,6 +40,7 @@ const restaurant = {
             price: 45000
         },
         {
+            id: "4",
             food: {
                 name: "Cơm hải sản",
                 description: "Cơm chiên cùng tôm, mực và rau củ tươi ngon.",
@@ -44,6 +49,7 @@ const restaurant = {
             price: 75000
         },
         {
+            id: "5",
             food: {
                 name: "Lẩu Thái chua cay",
                 description: "Nước lẩu đậm đà kết hợp tôm, mực và rau tươi.",
@@ -52,6 +58,7 @@ const restaurant = {
             price: 120000
         },
         {
+            id: "6",
             food: {
                 name: "Gỏi xoài tôm khô",
                 description: "Gỏi xoài xanh kết hợp tôm khô, đậu phộng và rau thơm.",
@@ -60,6 +67,7 @@ const restaurant = {
             price: 45000
         },
         {
+            id: "7",
             food: {
                 name: "Cơm hải sản",
                 description: "Cơm chiên cùng tôm, mực và rau củ tươi ngon.",
@@ -68,6 +76,7 @@ const restaurant = {
             price: 75000
         },
         {
+            id: "8",
             food: {
                 name: "Lẩu Thái chua cay",
                 description: "Nước lẩu đậm đà kết hợp tôm, mực và rau tươi.",
@@ -76,6 +85,7 @@ const restaurant = {
             price: 120000
         },
         {
+            id: "9",
             food: {
                 name: "Gỏi xoài tôm khô",
                 description: "Gỏi xoài xanh kết hợp tôm khô, đậu phộng và rau thơm.",
@@ -131,14 +141,14 @@ const RestaurantPage = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {
                             menu.map((item, index) => (
-                                <div key={index}>
+                                <Link key={index} to={`/foods/${item.id}`}>
                                     <FoodCard 
                                         name={item.food.name}
                                         description={item.food.description}
                                         imgUrl={item.food.imgUrl}
                                         price={item.price}
                                     />
-                                </div>
+                                </Link>
                             ))
                         }
                     </div>
