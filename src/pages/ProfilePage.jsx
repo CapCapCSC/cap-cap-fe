@@ -1,17 +1,14 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Footer from "@/components/custom/Footer";
-import { FaInstagram, FaFacebook } from "react-icons/fa";
+import { FaInstagram, FaFacebook, FaEdit } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { IoMdCamera } from "react-icons/io";
 import { useAuth } from "../context/AuthContext";
-
-// Import badge images
-import badge1 from "@/assets/badges/badge_1.png";
-import badge2 from "@/assets/badges/badge_2.png";
-import badge3 from "@/assets/badges/badge_3.png";
-import badge4 from "@/assets/badges/badge_4.png";
-import badge5 from "@/assets/badges/badge_5.png";
-import badge6 from "@/assets/badges/badge_6.png";
+import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
+import userService from "@/services/userService";
 
 // Tab enum for better readability
 const TabType = {
@@ -22,77 +19,53 @@ const TabType = {
 };
 
 const ProfilePage = () => {
-    const { user } = useAuth();
-    const isCurrentUser = !!user; // Check if this is the authenticated user
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { user: currentUser, updateUserProfile } = useAuth();
     
-    // Mock user data - in a real app, this would come from your auth context/state
-    const [userData, setUserData] = useState({
-        name: "Bakugo Katsuki",
-        bio: "You wanna talk about some big disparity? Lack of understanding? Dread? Guess what- I've long since taken all that crap to heart. And I've seen a real step toward progress, with all that. It might take some time, but some people I know are trying to push forward. Thanks anyway but, you can shove your sermon... ya nutsack-faced Handy-man!",
-        avatar: "https://qph.cf2.quoracdn.net/main-qimg-c0216ecbc80f9481f1635325f770650e-lq",
-        social: {
-            instagram: "bakugo_katsuki",
-            facebook: "Great Explosion Murder God Dynamight",
-            email: "bakugo2004@gmail.com"
-        }
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [editing, setEditing] = useState(false);
+    const [formData, setFormData] = useState({
+        username: "",
+        email: "",
+        password: ""
     });
 
-    // File input ref
-    const fileInputRef = useRef(null);
-    
-    // State for avatar change modal
+    // Initialize state for UI components
+    const [activeTab, setActiveTab] = useState(TabType.CHECKIN);
+    const [activeCheckInId, setActiveCheckInId] = useState(1);
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
     const [previewAvatar, setPreviewAvatar] = useState(null);
-    
-    // State for badge modal
     const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
     const [selectedBadge, setSelectedBadge] = useState(null);
-    
-    // State for voucher modal
     const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
     const [selectedVoucher, setSelectedVoucher] = useState(null);
+    const [quizCurrentPage, setQuizCurrentPage] = useState(1);
+    const quizItemsPerPage = 3;
+    const totalQuizPages = 2;
     
-    // Mock badges data
+    const fileInputRef = useRef(null);
+
+    const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [newUsername, setNewUsername] = useState("");
+
+    // Mock data for now - will be replaced with API calls
     const badges = [
         { 
             _id: "1", 
             name: "Chuyên gia ẩm thực", 
-            iconUrl: badge1, 
+            iconUrl: "https://via.placeholder.com/100",
             description: "Đánh giá 10 món ăn và viết review chi tiết"
         },
         { 
             _id: "2", 
             name: "Người mới", 
-            iconUrl: badge2, 
+            iconUrl: "https://via.placeholder.com/100",
             description: "Đã tham gia hệ thống"
-        },
-        { 
-            _id: "3", 
-            name: "Khách quen", 
-            iconUrl: badge3, 
-            description: "Check-in tại 5 nhà hàng khác nhau" 
-        },
-        { 
-            _id: "4", 
-            name: "Thực khách đam mê", 
-            iconUrl: badge4, 
-            description: "10 lần check-in trong 1 tháng" 
-        },
-        { 
-            _id: "5", 
-            name: "Người ảnh hưởng", 
-            iconUrl: badge5, 
-            description: "Bài đánh giá có hơn 50 lượt thích" 
-        },
-        { 
-            _id: "6", 
-            name: "Thượng khách", 
-            iconUrl: badge6, 
-            description: "Thành viên VIP của hệ thống" 
         }
     ];
     
-    // Mock vouchers data
     const vouchers = [
         {
             _id: "v1",
@@ -106,61 +79,14 @@ const ProfilePage = () => {
             ],
             discountValue: 10,
             used: false
-        },
-        {
-            _id: "v2",
-            name: "Giảm giá 20%",
-            validUntil: "2025-06-30T23:59:59.000Z",
-            applicableRestaurants: [
-                {
-                    _id: "restaurantObjectId2",
-                    name: "Nhà hàng B"
-                }
-            ],
-            discountValue: 20,
-            used: false
-        },
-        {
-            _id: "v3",
-            name: "Miễn phí món tráng miệng",
-            validUntil: "2025-03-15T23:59:59.000Z",
-            applicableRestaurants: [
-                {
-                    _id: "restaurantObjectId3",
-                    name: "Nhà hàng C"
-                },
-                {
-                    _id: "restaurantObjectId4",
-                    name: "Nhà hàng D"
-                }
-            ],
-            discountValue: 0,
-            used: false
         }
     ];
     
-    // Mock check-in history data
     const checkInsData = [
         { id: 1, date: "01/01/2025", location: "Ăn tại quán A" },
-        { id: 2, date: "02/01/2025", location: "Ăn tại quán X" },
-        { id: 3, date: "03/01/2025", location: "Ăn tại quán Y" },
-        { id: 4, date: "04/01/2025", location: "Ăn tại quán Z" },
-        { id: 5, date: "05/01/2025", location: "Ăn tại quán T" },
-        { id: 6, date: "06/01/2025", location: "Ăn tại quán U" }
+        { id: 2, date: "02/01/2025", location: "Ăn tại quán X" }
     ];
     
-    // State to track active check-in
-    const [activeCheckInId, setActiveCheckInId] = useState(1); // Default first item as active
-    
-    // State to track active tab
-    const [activeTab, setActiveTab] = useState(TabType.CHECKIN);
-    
-    // State for quiz pagination
-    const [quizCurrentPage, setQuizCurrentPage] = useState(1);
-    const quizItemsPerPage = 3;
-    const totalQuizPages = 2; // Mock total pages
-    
-    // Mock quiz history data
     const quizHistory = [
         {
             _id: "q1",
@@ -182,107 +108,105 @@ const ProfilePage = () => {
                 }
             ],
             rewards: {
-                badge: "badge3",
+                badge: "1",
                 voucher: "v1"
-            }
-        },
-        {
-            _id: "q2",
-            quizId: "quiz124",
-            userId: "user456",
-            score: 6,
-            correctAnswers: 6,
-            totalQuestions: 10,
-            timeSpent: 450,
-            startedAt: "2024-04-22T14:30:00.000Z",
-            completedAt: "2024-04-22T14:37:30.000Z",
-            status: "completed",
-            answers: [
-                {
-                    questionId: "question2",
-                    selectedAnswer: "Tokyo",
-                    isCorrect: true,
-                    timeSpent: 25
-                }
-            ],
-            rewards: {
-                badge: "badge1",
-                voucher: null
-            }
-        },
-        {
-            _id: "q3",
-            quizId: "quiz125",
-            userId: "user456",
-            score: 10,
-            correctAnswers: 10,
-            totalQuestions: 10,
-            timeSpent: 240,
-            startedAt: "2024-04-20T09:15:00.000Z",
-            completedAt: "2024-04-20T09:19:00.000Z",
-            status: "completed",
-            answers: [
-                {
-                    questionId: "question3",
-                    selectedAnswer: "Rome",
-                    isCorrect: true,
-                    timeSpent: 20
-                }
-            ],
-            rewards: {
-                badge: "badge5",
-                voucher: "v2"
-            }
-        },
-        {
-            _id: "q4",
-            quizId: "quiz126",
-            userId: "user456",
-            score: 7,
-            correctAnswers: 7,
-            totalQuestions: 10,
-            timeSpent: 320,
-            startedAt: "2024-04-18T16:20:00.000Z",
-            completedAt: "2024-04-18T16:25:20.000Z",
-            status: "completed",
-            answers: [
-                {
-                    questionId: "question4",
-                    selectedAnswer: "Madrid",
-                    isCorrect: false,
-                    timeSpent: 40
-                }
-            ],
-            rewards: {
-                badge: "badge2",
-                voucher: "v3"
-            }
-        },
-        {
-            _id: "q5",
-            quizId: "quiz127",
-            userId: "user456",
-            score: 9,
-            correctAnswers: 9,
-            totalQuestions: 10,
-            timeSpent: 275,
-            startedAt: "2024-04-15T08:10:00.000Z",
-            completedAt: "2024-04-15T08:14:35.000Z",
-            status: "completed",
-            answers: [
-                {
-                    questionId: "question5",
-                    selectedAnswer: "Berlin",
-                    isCorrect: true,
-                    timeSpent: 28
-                }
-            ],
-            rewards: {
-                badge: "badge4",
-                voucher: null
             }
         }
     ];
+
+    const isOwnProfile = currentUser && currentUser.id === id;
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                setLoading(true);
+                const userData = await userService.getUserById(id);
+                setUser(userData);
+                setFormData({
+                    username: userData.username,
+                    email: userData.email,
+                    avatar: userData.avatar,
+                });
+                setNewUsername(userData.username);
+            } catch (error) {
+                toast.error(error.message || "Failed to fetch user data");
+                console.error("Error fetching user:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchUser();
+        }
+    }, [id]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!isOwnProfile) {
+            toast.error("You can only edit your own profile");
+            return;
+        }
+        
+        // Validate formData fields according to schema requirements
+        const errors = [];
+        
+        if (formData.username && (formData.username.length < 3 || formData.username.length > 30)) {
+            errors.push("Username must be between 3 and 30 characters");
+        }
+        
+        if (formData.email && !/^\S+@\S+\.\S+$/.test(formData.email)) {
+            errors.push("Please enter a valid email address");
+        }
+        
+        if (formData.password && (formData.password.length < 6 || formData.password.length > 30)) {
+            errors.push("Password must be between 6 and 30 characters");
+        }
+        
+        if (errors.length > 0) {
+            errors.forEach(error => toast.error(error));
+            return;
+        }
+        
+        // Only include fields that have changed
+        const changedData = {};
+        if (formData.username !== user.username) changedData.username = formData.username;
+        if (formData.email !== user.email) changedData.email = formData.email;
+        if (formData.password) changedData.password = formData.password;
+        
+        // Don't submit if nothing has changed
+        if (Object.keys(changedData).length === 0) {
+            toast.info("No changes to save");
+            setEditing(false);
+            return;
+        }
+        
+        try {
+            await updateUserProfile(id, changedData);
+            toast.success("Profile updated successfully");
+            setEditing(false);
+        } catch (error) {
+            toast.error(error.message || "Failed to update profile");
+            console.error("Error updating profile:", error);
+        }
+    };
+
+    if (loading) {
+        return <div className="container mt-32 flex justify-center">Loading profile...</div>;
+    }
+
+    if (!user) {
+        return <div className="container mt-32 flex justify-center">User not found</div>;
+    }
     
     // Handle click on check-in circle
     const handleCheckInClick = (id) => {
@@ -341,10 +265,10 @@ const ProfilePage = () => {
     // Handle confirm avatar change
     const handleConfirmAvatarChange = () => {
         if (previewAvatar) {
-            setUserData({
-                ...userData,
+            setUser(prevUser => ({
+                ...prevUser,
                 avatar: previewAvatar
-            });
+            }));
         }
         setIsAvatarModalOpen(false);
         setPreviewAvatar(null);
@@ -359,6 +283,64 @@ const ProfilePage = () => {
     // Handle page change for quiz history
     const handleQuizPageChange = (pageNumber) => {
         setQuizCurrentPage(pageNumber);
+    };
+
+    const handleUsernameEditStart = () => {
+        setIsEditingUsername(true);
+    };
+
+    const handleUsernameEditCancel = () => {
+        setIsEditingUsername(false);
+        setNewUsername(user.username); // Reset to current username
+    };
+
+    const handleUsernameChange = (e) => {
+        setNewUsername(e.target.value);
+    };
+
+    const handleUsernameSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!newUsername.trim()) {
+            toast.error("Username cannot be empty");
+            return;
+        }
+        
+        if (newUsername.length < 3) {
+            toast.error("Username must be at least 3 characters");
+            return;
+        }
+        
+        if (newUsername.length > 30) {
+            toast.error("Username cannot exceed 30 characters");
+            return;
+        }
+        
+        try {
+            // Create update data - only include username
+            const updatedData = {
+                username: newUsername,
+                email: user.email
+            };
+            
+            await updateUserProfile(id, updatedData);
+            
+            setUser((prevState) => ({
+                ...prevState,
+                username: newUsername
+            }));
+            
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                username: newUsername
+            }));
+            
+            setIsEditingUsername(false);
+            toast.success("Username updated successfully");
+        } catch (error) {
+            toast.error(error.message || "Failed to update username");
+            console.error("Error updating username:", error);
+        }
     };
 
     // Render check-in history content
@@ -575,8 +557,16 @@ const ProfilePage = () => {
                         {/* Avatar */}
                         <div className="flex flex-col items-center">
                             <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-lg mb-4 relative group">
-                                <img src={userData.avatar} alt={userData.name} className="w-full h-full object-cover" />
-                                {isCurrentUser && (
+                                {user.avatar ? (
+                                    <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                        <span className="text-3xl font-semibold text-red-500">
+                                            {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                                        </span>
+                                    </div>
+                                )}
+                                {isOwnProfile && (
                                     <div 
                                         className="absolute inset-0 flex items-center justify-center bg-indigo-600/0 group-hover:bg-gray-500/30 group-hover:backdrop-blur-sm transition-all duration-300 cursor-pointer"
                                         onClick={handleAvatarChangeClick}
@@ -586,31 +576,69 @@ const ProfilePage = () => {
                                 )}
                             </div>
                             
-                            <h1 className="text-2xl font-bold text-center">{userData.name}</h1>
+                            {isEditingUsername ? (
+                                <form onSubmit={handleUsernameSubmit} className="w-full max-w-xs mb-4">
+                                    <div className="mb-2">
+                                        <input
+                                            type="text"
+                                            value={newUsername}
+                                            onChange={handleUsernameChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                                            placeholder="Enter new username"
+                                        />
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <button
+                                            type="button"
+                                            onClick={handleUsernameEditCancel}
+                                            className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                                        >
+                                            Hủy
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="px-3 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
+                                        >
+                                            Lưu
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="flex items-center mb-4">
+                                    <h1 className="text-2xl font-bold text-center">{user.username}</h1>
+                                    {isOwnProfile && (
+                                        <button 
+                                            onClick={handleUsernameEditStart} 
+                                            className="ml-2 text-gray-500 hover:text-red-600"
+                                            title="Edit username"
+                                        >
+                                            <FaEdit />
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                             
                             {/* Bio as quote */}
                             <div className="mt-4 px-4 relative">
                                 <div className="absolute top-0 left-0 text-gray-300 text-4xl font-serif">❝</div>
                                 <p className="text-gray-600 text-center pt-4 px-4 pb-6 italic">
-                                    {userData.bio}
+                                    {user.bio || "No bio available"}
                                 </p>
                                 <div className="absolute bottom-0 right-0 text-gray-300 text-4xl font-serif">❞</div>
                             </div>
                             
                             {/* Social links */}
                             <div className="w-full mt-6 space-y-3">
-                                <div className="flex items-center gap-3">
-                                    <FaInstagram className="text-pink-500 text-xl" />
-                                    <span>{userData.social.instagram}</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <FaFacebook className="text-blue-600 text-xl" />
-                                    <span>{userData.social.facebook}</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <MdEmail className="text-red-500 text-xl" />
-                                    <span>{userData.social.email}</span>
-                                </div>
+                                {user.email && (
+                                    <>
+                                        {user.email && (
+                                            <div className="flex items-center gap-3">
+                                                <MdEmail className="text-red-500 text-xl" />
+                                                <span>{user.email}</span>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -668,7 +696,7 @@ const ProfilePage = () => {
             </div>
             
             {/* Avatar change modal - only accessible to authenticated users */}
-            {isAvatarModalOpen && isCurrentUser && (
+            {isAvatarModalOpen && isOwnProfile && (
                 <div className="fixed inset-0 bg-gray-500/30 backdrop-blur-sm  flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full">
                         <h3 className="text-xl font-medium mb-4">Đổi avatar</h3>
@@ -676,7 +704,7 @@ const ProfilePage = () => {
                         <div className="mb-4">
                             <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-2 border-gray-300 mb-2">
                                 <img 
-                                    src={previewAvatar || userData.avatar} 
+                                    src={previewAvatar || user.avatar || "https://via.placeholder.com/100"} 
                                     alt="Preview" 
                                     className="w-full h-full object-cover"
                                 />
@@ -824,6 +852,7 @@ const ProfilePage = () => {
             
             <div className="flex-grow"></div>
             <Footer />
+            <Toaster />
         </div>
     );
 };

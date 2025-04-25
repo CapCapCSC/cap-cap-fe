@@ -9,7 +9,7 @@ export const NavbarProvider = ({ children }) => {
 
     return (
         <NavbarContext.Provider value={{ isAuthenticated }}>
-        {children}
+            {children}
         </NavbarContext.Provider>
     );
 };

@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from "./context/AuthContext.jsx";
-import { NavbarProvider } from "./context/NavbarContext.jsx";
 import NavbarSelector from './components/NavbarSelector.jsx';
 
 import HomePage from './pages/HomePage';
@@ -20,33 +19,31 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <NavbarProvider>
-          <NavbarSelector />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/map" element={<MapPage />} />
+        <NavbarSelector />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/map" element={<MapPage />} />
 
-            {/* Authentication */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+          {/* Authentication */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
-            {/* Restaurant */}
-            <Route path="/restaurants" element={<RestaurantListPage />} />
-            <Route path="/restaurants/:id" element={<RestaurantPage />} />
+          {/* Restaurant */}
+          <Route path="/restaurants" element={<RestaurantListPage />} />
+          <Route path="/restaurants/:id" element={<RestaurantPage />} />
 
-            {/* Foods */}
-            <Route path="/foods" element={<FoodListPage />} />
-            <Route path="/foods/:id" element={<FoodDetailPage />} />
-            
-            {/* Profile */}
-            <Route path="/profiles/:id" element={<ProfilePage />} />
+          {/* Foods */}
+          <Route path="/foods" element={<FoodListPage />} />
+          <Route path="/foods/:id" element={<FoodDetailPage />} />
+          
+          {/* Profile */}
+          <Route path="/profiles/:id" element={<ProfilePage />} />
 
-            {/* 404 */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </NavbarProvider>
+          {/* 404 */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
       </AuthProvider>
     </Router>
   );

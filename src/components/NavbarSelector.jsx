@@ -1,8 +1,9 @@
-import { useNavbar } from '../context/NavbarContext';
+import { useAuth } from '../context/AuthContext';
 import Navbar, { AuthenticatedNavbar } from './custom/Navbar';
 
 const NavbarSelector = () => {
-    const { isAuthenticated } = useNavbar();
+    const { user } = useAuth();
+    const isAuthenticated = !!user;
     
     return isAuthenticated ? <AuthenticatedNavbar /> : <Navbar />;
 };
