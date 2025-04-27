@@ -1,6 +1,7 @@
 import { Phone, Mail, MapPin, Send, ArrowRight } from "lucide-react";
 
 function ContactUs() {
+
     return (
         <div className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
             <div className="container mx-auto">
@@ -46,7 +47,7 @@ function ContactUs() {
                             
                             <button 
                                 type="submit" 
-                                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg flex items-center gap-2 transition-colors"
+                                className="cursor-pointer bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg flex items-center gap-2 transition-colors"
                             >
                                 Gửi tin nhắn <Send size={16} />
                             </button>
@@ -75,7 +76,7 @@ function ContactUs() {
                                     </div>
                                     <div>
                                         <h4 className="font-medium text-gray-900">Email</h4>
-                                        <p className="text-gray-600">capcap@gmail.com</p>
+                                        <p className="text-gray-600">capcapwda.project@gmail.com</p>
                                     </div>
                                 </div>
                                 

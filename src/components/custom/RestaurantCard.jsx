@@ -10,7 +10,7 @@ const RestaurantCard = ({ imageUrl, name, locationUrl, menu, restaurantId }) => 
     };
     
     const handleRestaurantClick = () => {
-        navigate(`/restaurants/${restaurantId || 1}`);
+        navigate(`/restaurants/${restaurantId}`);
     };
     
     return (
@@ -50,11 +50,11 @@ const RestaurantCard = ({ imageUrl, name, locationUrl, menu, restaurantId }) => 
                         Món ăn nổi bật
                     </h4>
                     <ul className="space-y-2">
-                        {menu.slice(0, 2).map((item, index) => (
+                        {menu.slice(0, 2).map((item) => (
                             <li 
-                                key={index} 
+                                key={item.food._id} 
                                 className="flex items-center space-x-2 p-1.5 rounded-md hover:bg-red-50 transition-colors cursor-pointer"
-                                onClick={(e) => handleFoodClick(item.food.id || index + 1, e)}
+                                onClick={(e) => handleFoodClick(item.food._id, e)}
                             >
                                 <img
                                     src={item.food.imgUrl}

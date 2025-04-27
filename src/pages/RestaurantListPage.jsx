@@ -2,114 +2,29 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Search, MapPin, Filter, ChevronDown, X } from "lucide-react";
 import HCMMap from "@/components/custom/HCMMap";
-
-// Demo data
-const restaurants = [
-    {
-        id: 1,
-        imageUrl: "https://noithattruongsa.com/wp-content/uploads/2020/11/mau-thiet-ke-quan-an-sang-binh-dan-dep-15-Hang-Noi-That-Truong-Sa.jpg",
-        name: "Quán A",
-        locationUrl: "https://maps.google.com/?q=10.762622,106.660172",
-        address: "123 Nguyễn Huệ, Quận 1, TP.HCM",
-        districtId: "quan-1",
-        menu: [
-            {
-                food: {
-                    name: "Cơm hải sản",
-                    description: "Cơm chiên cùng tôm, mực và rau củ tươi ngon.",
-                    imgUrl: "https://danviet.ex-cdn.com/files/f1/2020/8/31/image4-1598431030-68-width605height416-1598810316509-15988103165132025318295.png"
-                },
-                price: 75000
-            }
-        ]
-    },
-    {
-        id: 2,
-        imageUrl: "https://vuongquocden.vn/wp-content/uploads/2022/08/thiet-ke-quan-an-vat.jpg",
-        name: "Quán B",
-        locationUrl: "https://maps.google.com/?q=10.772622,106.680172",
-        address: "456 Điện Biên Phủ, Quận 3, TP.HCM",
-        districtId: "quan-3",
-        menu: [
-            {
-                food: {
-                    name: "Lẩu Thái chua cay",
-                    description: "Nước lẩu đậm đà kết hợp tôm, mực và rau tươi.",
-                    imgUrl: "https://i-giadinh.vnecdn.net/2022/12/17/Thanh-pham-1-1-5372-1671269525.jpg"
-                },
-                price: 120000
-            }
-        ]
-    },
-    {
-        id: 3,
-        imageUrl: "https://websitecukcuk.com/blog/wp-content/uploads/2020/04/Thiet-ke-quan-an-vat-nhu-the-nao-de-thu-hut-khach-hang-4.jpg",
-        name: "Quán C",
-        locationUrl: "https://maps.google.com/?q=10.752622,106.670172",
-        address: "789 Võ Thị Sáu, Quận 3, TP.HCM",
-        districtId: "quan-3",
-        menu: [
-            {
-                food: {
-                    name: "Gỏi xoài tôm khô",
-                    description: "Gỏi xoài xanh kết hợp tôm khô, đậu phộng và rau thơm.",
-                    imgUrl: "https://cdn.tgdd.vn/2020/06/CookProduct/1-1200x675-3.jpg"
-                },
-                price: 45000
-            }
-        ]
-    },
-    {
-        id: 4,
-        imageUrl: "https://kientrucmynghe.com.vn/wp-content/uploads/2022/05/thiet-ke-quan-an-san-vuon-8jpg-scaled.jpg",
-        name: "Quán D",
-        locationUrl: "https://maps.google.com/?q=10.782622,106.650172",
-        address: "321 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM",
-        districtId: "quan-binh-thanh",
-        menu: [
-            {
-                food: {
-                    name: "Cơm hải sản",
-                    description: "Cơm chiên cùng tôm, mực và rau củ tươi ngon.",
-                    imgUrl: "https://danviet.ex-cdn.com/files/f1/2020/8/31/image4-1598431030-68-width605height416-1598810316509-15988103165132025318295.png"
-                },
-                price: 75000
-            }
-        ]
-    },
-    {
-        id: 5,
-        imageUrl: "https://cdn.thietkenoithat.com/images/upload/images/thiet-ke-quan-cafe-san-vuon-thu-hut-view-dep-khach-se-do-ve(1).jpg",
-        name: "Quán E",
-        locationUrl: "https://maps.google.com/?q=10.792622,106.690172",
-        address: "159 Nguyễn Văn Linh, Quận 7, TP.HCM",
-        districtId: "quan-7",
-        menu: [
-            {
-                food: {
-                    name: "Lẩu Thái chua cay",
-                    description: "Nước lẩu đậm đà kết hợp tôm, mực và rau tươi.",
-                    imgUrl: "https://i-giadinh.vnecdn.net/2022/12/17/Thanh-pham-1-1-5372-1671269525.jpg"
-                },
-                price: 120000
-            }
-        ]
-    },
-];
+import { getRestaurants } from "@/services/restaurantService";
 
 const districts = [
     { id: "all", name: "Tất cả quận" },
-    { id: "quan-1", name: "Quận 1" },
-    { id: "quan-3", name: "Quận 3" },
-    { id: "quan-7", name: "Quận 7" },
-    { id: "quan-binh-thanh", name: "Quận Bình Thạnh" },
-    { id: "quan-9", name: "Quận 9" },
-];
-
-const sortOptions = [
-    { id: "relevance", name: "Mức độ phù hợp" },
-    { id: "price-low", name: "Giá: Thấp đến cao" },
-    { id: "price-high", name: "Giá: Cao đến thấp" },
+    { id: "quan1", name: "Quận 1" },
+    { id: "quan2", name: "Quận 2" },
+    { id: "quan3", name: "Quận 3" },
+    { id: "quan4", name: "Quận 4" },
+    { id: "quan5", name: "Quận 5" },
+    { id: "quan6", name: "Quận 6" },
+    { id: "quan7", name: "Quận 7" },
+    { id: "quan8", name: "Quận 8" },
+    { id: "quan9", name: "Quận 9" },
+    { id: "quan10", name: "Quận 10" },
+    { id: "quan11", name: "Quận 11" },
+    { id: "quan12", name: "Quận 12" },
+    { id: "binhthanh", name: "Quận Bình Thạnh" },
+    { id: "tanbinh", name: "Quận Tân Bình" },
+    { id: "tanphu", name: "Quận Tân Phú" },
+    { id: "phunhuan", name: "Quận Phú Nhuận" },
+    { id: "govap", name: "Quận Gò Vấp" },
+    { id: "binhtan", name: "Quận Bình Tân" },
+    { id: "thuduc", name: "Quận Thủ Đức" },
 ];
 
 const RestaurantListPage = () => {
@@ -119,15 +34,42 @@ const RestaurantListPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
     const [viewMode, setViewMode] = useState("grid"); // grid or map
+    const [restaurants, setRestaurants] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRestaurants = async () => {
+            try {
+                const response = await getRestaurants();
+                setRestaurants(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error(error);
+                setLoading(false);
+            }
+        };
+
+        fetchRestaurants();
+    }, []);
+
+    // Show spinner while loading
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500" />
+            </div>
+        );
+    }
 
     // Filter restaurants based on selected district and search query
-    const filteredRestaurants = restaurants.filter(restaurant => {
-        const matchesDistrict = selectedDistrict === "all" || restaurant.districtId === selectedDistrict;
-        const matchesSearch = searchQuery === "" || 
-            restaurant.name.toLowerCase().includes(searchQuery.toLowerCase());
-        
-        return matchesDistrict && matchesSearch;
-    });
+    const filteredRestaurants = Array.isArray(restaurants)
+        ? restaurants.filter(restaurant => {
+            const matchesDistrict = selectedDistrict === "all" || restaurant.districtId === selectedDistrict;
+            const matchesSearch = searchQuery === "" || 
+                restaurant.name.toLowerCase().includes(searchQuery.toLowerCase());
+            return matchesDistrict && matchesSearch;
+        })
+        : [];
 
     // Sort restaurants based on selected sort option
     const sortedRestaurants = [...filteredRestaurants].sort((a, b) => {
@@ -155,7 +97,7 @@ const RestaurantListPage = () => {
 
     // Restaurant card component
     const RestaurantCard = ({ restaurant }) => (
-        <Link to={`/restaurants/${restaurant.id}`} className="group block rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-white">
+        <Link to={`/restaurants/${restaurant._id}`} className="group block rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-white">
             <div className="h-48 overflow-hidden relative">
                 <img 
                     src={restaurant.imageUrl} 
@@ -213,26 +155,6 @@ const RestaurantListPage = () => {
                                 <span>Lọc</span>
                             </button>
                             
-                            <div className="relative">
-                                <button 
-                                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                                    onClick={() => setSelectedDistrict("all")}
-                                >
-                                    <span>{districts.find(d => d.id === selectedDistrict)?.name}</span>
-                                    <ChevronDown className="h-4 w-4" />
-                                </button>
-                                {/* Dropdown would go here in a real implementation */}
-                            </div>
-                            
-                            <div className="relative hidden sm:block">
-                                <button 
-                                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                                >
-                                    <span>{sortOptions.find(o => o.id === selectedSort)?.name}</span>
-                                    <ChevronDown className="h-4 w-4" />
-                                </button>
-                                {/* Dropdown would go here in a real implementation */}
-                            </div>
                         </div>
                         
                         <div className="flex items-center gap-2">
@@ -303,26 +225,6 @@ const RestaurantListPage = () => {
                                     </div>
                                 </div>
                                 
-                                <div>
-                                    <h3 className="font-medium mb-2">Sắp xếp theo</h3>
-                                    <div className="space-y-2">
-                                        {sortOptions.map((option) => (
-                                            <div key={option.id} className="flex items-center">
-                                                <input 
-                                                    type="radio" 
-                                                    id={option.id} 
-                                                    name="sort" 
-                                                    checked={selectedSort === option.id}
-                                                    onChange={() => setSelectedSort(option.id)}
-                                                    className="h-4 w-4 text-red-600"
-                                                />
-                                                <label htmlFor={option.id} className="ml-2 text-sm text-gray-700">
-                                                    {option.name}
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
                             
                             <div className="mt-6 flex justify-end">
@@ -359,7 +261,7 @@ const RestaurantListPage = () => {
                         {sortedRestaurants.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {sortedRestaurants.map((restaurant) => (
-                                    <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+                                    <RestaurantCard key={restaurant._id} restaurant={restaurant} />
                                 ))}
                             </div>
                         ) : (

@@ -43,6 +43,7 @@ function App() {
 
           {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />
+          <Route path="/foods/undefined" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
     </Router>

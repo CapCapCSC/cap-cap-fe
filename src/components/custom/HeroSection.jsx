@@ -2,7 +2,7 @@ import { Search } from 'lucide-react';
 
 function HeroSection() {
     return (
-        <div className="relative min-h-[600px] flex items-center bg-gradient-to-r from-red-600 to-red-800 overflow-hidden">
+        <div className="relative min-h-[400px] flex items-center bg-gradient-to-r from-red-600 to-red-800 overflow-hidden">
             <div className="absolute inset-0 z-0 opacity-20">
                 <img 
                     src="https://salindaresort.com/uploads/articles/134/bo-tui-11-quan-banh-xeo-ngon-nhat-phu-quoc.jpg" 

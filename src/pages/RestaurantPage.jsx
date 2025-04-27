@@ -2,85 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { ChevronLeft, MapPin, Search } from "lucide-react";
-
-// demo du lieu
-const restaurants = [
-    {
-        id: 1,
-        name: "Quán A",
-        imageUrl: "https://noithattruongsa.com/wp-content/uploads/2020/11/mau-thiet-ke-quan-an-sang-binh-dan-dep-15-Hang-Noi-That-Truong-Sa.jpg",
-        coverImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cmVzdGF1cmFudCUyMGludGVyaW9yfGVufDB8fDB8fHww",
-        district: "Quận 1",
-        locationUrl: "https://maps.google.com/?q=10.762622,106.660172",
-        menu: [
-            {
-                food: {
-                    _id: "1",
-                    name: "Cơm hải sản",
-                    description: "Cơm chiên cùng tôm, mực và rau củ tươi ngon.",
-                    imgUrl: "https://danviet.ex-cdn.com/files/f1/2020/8/31/image4-1598431030-68-width605height416-1598810316509-15988103165132025318295.png"
-                },
-                price: 75000,
-                category: "Cơm"
-            },
-            {
-                food: {
-                    _id: "2",
-                    name: "Lẩu Thái chua cay",
-                    description: "Nước lẩu đậm đà kết hợp tôm, mực và rau tươi.",
-                    imgUrl: "https://i-giadinh.vnecdn.net/2022/12/17/Thanh-pham-1-1-5372-1671269525.jpg"
-                },
-                price: 120000,
-                category: "Lẩu"
-            },
-            {
-                food: {
-                    _id: "3",
-                    name: "Gỏi xoài tôm khô",
-                    description: "Gỏi xoài xanh kết hợp tôm khô, đậu phộng và rau thơm.",
-                    imgUrl: "https://cdn.tgdd.vn/2020/06/CookProduct/1-1200x675-3.jpg"
-                },
-                price: 45000,
-                category: "Khai vị"
-            },
-            {
-                food: {
-                    _id: "4",
-                    name: "Cơm chiên dương châu",
-                    description: "Cơm chiên với thịt xá xíu, đậu Hà Lan, và trứng.",
-                    imgUrl: "https://cdn.tgdd.vn/Files/2021/08/09/1373996/cach-lam-com-chien-duong-chau-thom-ngon-hap-dan-tai-nha-202201041044461946.jpg"
-                },
-                price: 65000,
-                category: "Cơm"
-            },
-            {
-                food: {
-                    _id: "5",
-                    name: "Bún bò Huế",
-                    description: "Bún bò Huế truyền thống với nước dùng cay nồng đặc trưng.",
-                    imgUrl: "https://i-giadinh.vnecdn.net/2023/02/27/Thanh-pham-1-8438-1677489900.jpg"
-                },
-                price: 85000,
-                category: "Bún"
-            },
-            {
-                food: {
-                    _id: "6",
-                    name: "Chè thái",
-                    description: "Chè thái với thạch trái cây và sữa đặc.",
-                    imgUrl: "https://cdn.tgdd.vn/Files/2021/09/06/1380866/cach-nau-che-thai-sua-dac-thom-ngon-be-nao-cung-me-202201041333035215.jpg"
-                },
-                price: 35000,
-                category: "Tráng miệng"
-            },
-        ]
-    },
-    // ... other restaurants
-];
+import { getRestaurantById } from "@/services/restaurantService";
 
 const RestaurantPage = () => {
     const { id } = useParams();
     const [restaurant, setRestaurant] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [searchText, setSearchText] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
 
@@ -106,21 +33,38 @@ const RestaurantPage = () => {
     };
 
     useEffect(() => {
-        // In a real app, this would be a fetch call
-        const restaurantData = restaurants[id - 1] || null;
-        setRestaurant(restaurantData);
+        const fetchRestaurant = async () => {
+            setLoading(true);
+            try {
+                const restaurantData = await getRestaurantById(id);
+                setRestaurant(restaurantData);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRestaurant();
     }, [id]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500" />
+            </div>
+        );
+    }
 
     if (!restaurant) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
-                    <p>Đang tải thông tin nhà hàng...</p>
-                </div>
+                <p className="text-gray-500">Restaurant not found</p>
             </div>
         );
     }
+
+
 
     const filteredMenu = getFilteredMenu();
     const categories = getCategories(restaurant.menu);
@@ -130,7 +74,7 @@ const RestaurantPage = () => {
             {/* Back navigation */}
             <div className="bg-white sticky top-16 z-50 border-b">
                 <div className="container mx-auto max-w-6xl px-4 py-3 flex items-center">
-                    <Link to="/restaurants" className="flex items-center text-gray-700 hover:text-red-600 transition-colors">
+                    <Link to="/restaurants" className=" cursor-pointer flex items-center text-gray-700 hover:text-red-600 transition-colors">
                         <ChevronLeft className="h-5 w-5 mr-1" />
                         <span>Quay lại danh sách</span>
                     </Link>
@@ -214,7 +158,7 @@ const RestaurantPage = () => {
                                 {categories.map((category, index) => (
                                     <button
                                         key={index}
-                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                        className={`cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                                             selectedCategory === category
                                                 ? "bg-red-600 text-white"
                                                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -235,7 +179,7 @@ const RestaurantPage = () => {
                                 {filteredMenu.map((item, index) => (
                                     <div key={index} className="flex gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors">
                                         <Link 
-                                            to={`/foods/${item.food._id}`} 
+                                            to={`/foods/${item.food}`} 
                                             className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg group"
                                         >
                                             <img 
@@ -261,7 +205,7 @@ const RestaurantPage = () => {
                                                         Chi tiết
                                                     </Link>
                                                     <span className="text-gray-300">|</span>
-                                                    <button className="text-sm font-medium text-red-600 hover:text-red-700">
+                                                    <button className="cursor-pointer text-sm font-medium text-red-600 hover:text-red-700">
                                                         Đặt ngay
                                                     </button>
                                                 </div>
