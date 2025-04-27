@@ -18,3 +18,18 @@ export const getRandom3Restaurants = async (districtId) => {
     });
     return response.data;
 };
+
+export const createRestaurant = async (restaurantData) => {
+    const response = await API.post("/restaurants", restaurantData);
+    return response.data;
+};
+
+export const editRestaurant = async (id, restaurantData) => {
+    const response = await API.put(`/restaurants/${id}`, restaurantData);
+    return response.data;
+};
+
+export const deleteRestaurant = async (id) => {
+    const response = await API.delete(`/restaurants/${id}`);
+    return response.data;
+};

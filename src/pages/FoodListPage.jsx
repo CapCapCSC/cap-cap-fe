@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 // import axios from "axios";
 import FoodCard from "@/components/custom/FoodCard";
 import { Link } from "react-router-dom";
-import { getFoods } from '@/services/foodService';
+import { getFoods, createFood } from '@/services/foodService';
+import { IoMdAddCircle } from "react-icons/io";
 import {
   Pagination,
   PaginationContent,
@@ -12,6 +13,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
+import { useAdmin } from '../context/AdminContext.jsx';
 
 
 // We'll fetch foods from backend
@@ -25,6 +27,14 @@ const FoodListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [totalPages, setTotalPages] = useState(1);
+  const { isAdmin } = useAdmin();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newIngredients, setNewIngredients] = useState('');
+  const [newImgUrl, setNewImgUrl] = useState('');
+  const [newTags, setNewTags] = useState('');
+  const [modalError, setModalError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -52,13 +62,44 @@ const FoodListPage = () => {
     if (currentPage < totalPages) setCurrentPage(p => p + 1);
   };
 
+  const handleCreateSubmit = async (e) => {
+    e.preventDefault();
+    const foodData = {
+      name: newName,
+      description: newDescription,
+      ingredients: newIngredients.split(',').map(s => s.trim()).filter(Boolean),
+      imgUrl: newImgUrl,
+      tags: newTags.split(',').map(s => s.trim()).filter(Boolean),
+    };
+    try {
+      setLoading(true);
+      await createFood(foodData);
+      setShowAddModal(false);
+      setNewName(''); setNewDescription(''); setNewIngredients(''); setNewImgUrl(''); setNewTags('');
+      const response = await getFoods(currentPage, itemsPerPage);
+      setFoods(response.data);
+      const { total, limit } = response.pagination;
+      setTotalPages(Math.ceil(total / limit));
+      setLoading(false);
+    } catch (err) {
+      setModalError(err.message || 'Failed to create food');
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 mt-20">
       <div className="container mx-auto max-w-6xl px-4">
         <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
 
-          <div className="border-b px-6 py-4 sticky">
+          <div className="flex items-center justify-between border-b px-6 py-4 sticky">
             <h1 className="text-4xl font-lobster text-red-600">Danh sách món ăn</h1>
+            {isAdmin && (
+              <IoMdAddCircle
+                className="text-red-600 text-2xl cursor-pointer"
+                onClick={() => setShowAddModal(true)}
+              />
+            )}
           </div>
           <div className="p-6">
             {loading && <p>Đang tải danh sách món ăn...</p>}
@@ -110,6 +151,41 @@ const FoodListPage = () => {
           </Pagination>
         </div>
       </div>
+      {showAddModal && (
+        <div className="fixed inset-0 bg-gray-500/30 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md relative">
+            <button onClick={() => setShowAddModal(false)} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">&times;</button>
+            <h2 className="text-xl font-bold mb-4">Add New Food</h2>
+            {modalError && <p className="text-red-500 mb-2">{modalError}</p>}
+            <form onSubmit={handleCreateSubmit}>
+              <div className="mb-2">
+                <label className="block mb-1">Name</label>
+                <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full border px-3 py-2 rounded" required />
+              </div>
+              <div className="mb-2">
+                <label className="block mb-1">Description</label>
+                <textarea value={newDescription} onChange={(e) => setNewDescription(e.target.value)} className="w-full border px-3 py-2 rounded" required />
+              </div>
+              <div className="mb-2">
+                <label className="block mb-1">Ingredients (comma separated)</label>
+                <input type="text" value={newIngredients} onChange={(e) => setNewIngredients(e.target.value)} className="w-full border px-3 py-2 rounded" />
+              </div>
+              <div className="mb-2">
+                <label className="block mb-1">Image URL</label>
+                <input type="text" value={newImgUrl} onChange={(e) => setNewImgUrl(e.target.value)} className="w-full border px-3 py-2 rounded" />
+              </div>
+              <div className="mb-2">
+                <label className="block mb-1">Tags (comma separated tag IDs)</label>
+                <input type="text" value={newTags} onChange={(e) => setNewTags(e.target.value)} className="w-full border px-3 py-2 rounded" />
+              </div>
+              <div className="mt-4 flex justify-end space-x-2">
+                <button type="button" onClick={() => setShowAddModal(false)} className="px-4 py-2 rounded border">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-red-600 text-white rounded">Create</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

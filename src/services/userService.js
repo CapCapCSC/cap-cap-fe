@@ -51,10 +51,12 @@ const userService = {
         }
     },
 
-    // Get current user from localStorage
+    // Get current user and token from localStorage for AuthContext initialization
     getCurrentUser: () => {
-        const user = localStorage.getItem('user');
-        return user ? JSON.parse(user) : null;
+        const storedUser = localStorage.getItem('user');
+        const accessToken = localStorage.getItem('accessToken');
+        if (!storedUser || !accessToken) return null;
+        return { ...JSON.parse(storedUser), token: accessToken };
     }
 };
 

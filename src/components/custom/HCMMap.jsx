@@ -229,11 +229,11 @@ const HCMMap = () => {
                             
                             {filteredRestaurants.length > 0 ? (
                                 <p className="text-gray-600 text-sm">
-                                    Đã tìm thấy {filteredRestaurants.length} nhà hàng tại khu vực này
+                                    Đã tìm thấy {filteredRestaurants.length} quán ăn tại khu vực này
                                 </p>
                             ) : (
                                 <p className="text-gray-500 text-sm">
-                                    Chưa có nhà hàng nào trong khu vực này
+                                    Chưa có quán ăn nào trong khu vực này
                                 </p>
                             )}
                         </div>
@@ -276,8 +276,8 @@ const HCMMap = () => {
                                             Thông tin thêm
                                         </h4>
                                         <p className="text-sm text-gray-700">
-                                            Khu vực {selectedDistrict.name} có nhiều nhà hàng nổi tiếng với ẩm thực đa dạng. 
-                                            Bấm vào nhà hàng để xem địa chỉ chi tiết trên bản đồ.
+                                            Khu vực {selectedDistrict.name} có nhiều quán ăn nổi tiếng với ẩm thực đa dạng. 
+                                            Bấm vào quán ăn để xem địa chỉ chi tiết trên bản đồ.
                                         </p>
                                     </div>
                                 </div>
@@ -288,7 +288,7 @@ const HCMMap = () => {
                                     </div>
                                     <h4 className="text-lg font-medium text-gray-800 mb-2">Chưa có dữ liệu</h4>
                                     <p className="text-gray-500 max-w-xs mx-auto">
-                                        Hiện chưa có thông tin về nhà hàng tại khu vực {selectedDistrict.name}. 
+                                        Hiện chưa có thông tin về quán ăn tại khu vực {selectedDistrict.name}. 
                                         Vui lòng chọn một quận khác trên bản đồ.
                                     </p>
                                 </div>
@@ -300,8 +300,8 @@ const HCMMap = () => {
                         <div className="bg-red-50 rounded-full p-4 mb-4">
                             <MapPin className="text-red-600" size={32} />
                         </div>
-                        <h3 className="text-xl font-medium text-gray-800 mb-2 text-center">Chọn quận để xem nhà hàng</h3>
-                        <p className="text-gray-500 text-center">Bấm vào một quận trên bản đồ để xem danh sách nhà hàng trong khu vực</p>
+                        <h3 className="text-xl font-medium text-gray-800 mb-2 text-center">Chọn quận để xem quán ăn</h3>
+                        <p className="text-gray-500 text-center">Bấm vào một quận trên bản đồ để xem danh sách quán ăn trong khu vực</p>
                         
                     </div>
                 )}

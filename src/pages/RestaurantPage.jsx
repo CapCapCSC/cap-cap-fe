@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { ChevronLeft, MapPin, Search } from "lucide-react";
-import { getRestaurantById } from "@/services/restaurantService";
+import { ChevronLeft, MapPin, Search, X } from "lucide-react";
+import { getRestaurantById, editRestaurant, deleteRestaurant } from "@/services/restaurantService";
+import { MdModeEditOutline } from "react-icons/md";
+import { useAdmin } from "../context/AdminContext";
+import { TiDelete } from "react-icons/ti";
 
 const RestaurantPage = () => {
     const { id } = useParams();
     const [restaurant, setRestaurant] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editData, setEditData] = useState({ name: "", imageUrl: "", district: "", locationUrl: "", menu: [] });
     const [searchText, setSearchText] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
+
+    const { isAdmin } = useAdmin();
+    const navigate = useNavigate();
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // Get the unique categories
     const getCategories = (menu) => {
@@ -48,6 +57,46 @@ const RestaurantPage = () => {
         fetchRestaurant();
     }, [id]);
 
+    // Initialize editData when restaurant is loaded
+    useEffect(() => {
+        if (restaurant) {
+            setEditData({
+                name: restaurant.name,
+                imageUrl: restaurant.imageUrl,
+                district: restaurant.district,
+                locationUrl: restaurant.locationUrl,
+                menu: restaurant.menu.map(item => ({ food: item.food, price: item.price }))
+            });
+        }
+    }, [restaurant]);
+
+    const handleEditRestaurant = async () => {
+        try {
+            const payload = {
+                name: editData.name,
+                imageUrl: editData.imageUrl,
+                districtId: editData.district,
+                locationUrl: editData.locationUrl,
+                menu: editData.menu.map(item => ({ food: item.food._id, price: item.price })),
+            };
+            await editRestaurant(restaurant._id, payload);
+            const updated = await getRestaurantById(id);
+            setRestaurant(updated);
+            setShowEditModal(false);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleDeleteRestaurant = async () => {
+        try {
+            await deleteRestaurant(restaurant._id);
+            navigate("/restaurants");
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -64,15 +113,74 @@ const RestaurantPage = () => {
         );
     }
 
-
-
     const filteredMenu = getFilteredMenu();
     const categories = getCategories(restaurant.menu);
 
     return (
+        <>
+        {showEditModal && (
+            <div className="fixed inset-0 bg-gray-500/30 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-4 p-6 relative">
+                    <button type="button" onClick={() => setShowEditModal(false)} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+                        <X className="h-6 w-6" />
+                    </button>
+                    <h2 className="text-xl font-semibold mb-4">Chỉnh sửa quán ăn</h2>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Tên quán ắn</label>
+                            <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={editData.name} onChange={(e) => setEditData({ ...editData, name: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Ảnh URL</label>
+                            <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={editData.imageUrl} onChange={(e) => setEditData({ ...editData, imageUrl: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Quận/Huyện</label>
+                            <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={editData.district} onChange={(e) => setEditData({ ...editData, district: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Location URL</label>
+                            <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={editData.locationUrl} onChange={(e) => setEditData({ ...editData, locationUrl: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Menu</label>
+                            {editData.menu.map((item, idx) => (
+                                <div key={idx} className="flex gap-2 items-center mb-2">
+                                    <span className="flex-1">{item.food.name}</span>
+                                    <input type="number" className="w-24 border border-gray-300 rounded px-3 py-2" value={item.price} onChange={(e) => {
+                                        const menuCopy = [...editData.menu];
+                                        menuCopy[idx].price = Number(e.target.value);
+                                        setEditData({ ...editData, menu: menuCopy });
+                                    }} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="mt-6 flex justify-end">
+                        <button type="button" onClick={() => setShowEditModal(false)} className="cursor-pointer px-4 py-2 bg-gray-200 rounded mr-2">Hủy</button>
+                        <button type="button" onClick={handleEditRestaurant} className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        )}
+        {showDeleteModal && (
+            <div className="fixed inset-0 bg-gray-500/30 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6 relative">
+                    <button type="button" onClick={() => setShowDeleteModal(false)} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+                        <X className="h-6 w-6" />
+                    </button>
+                    <h2 className="text-xl font-semibold mb-4">Xác nhận xóa quán ăn</h2>
+                    <p className="mb-6">Bạn có chắc chắn muốn xóa quán ăn này? Hành động này không thể hoàn tác.</p>
+                    <div className="flex justify-end gap-2">
+                        <button type="button" onClick={() => setShowDeleteModal(false)} className="cursor-pointer px-4 py-2 bg-gray-200 rounded">Hủy</button>
+                        <button type="button" onClick={handleDeleteRestaurant} className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded">Xóa</button>
+                    </div>
+                </div>
+            </div>
+        )}
         <div className="min-h-screen bg-gray-50 pb-16">
             {/* Back navigation */}
-            <div className="bg-white sticky top-16 z-50 border-b">
+            <div className="bg-white sticky top-16 z-20 border-b">
                 <div className="container mx-auto max-w-6xl px-4 py-3 flex items-center">
                     <Link to="/restaurants" className=" cursor-pointer flex items-center text-gray-700 hover:text-red-600 transition-colors">
                         <ChevronLeft className="h-5 w-5 mr-1" />
@@ -112,7 +220,7 @@ const RestaurantPage = () => {
             <div className="container mx-auto max-w-6xl px-4 -mt-16 relative z-20 mb-8">
                 <div className="bg-white rounded-xl shadow-lg p-6">
                     <div className="flex items-center justify-between">
-                        <div>
+                        <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center text-gray-700">
                                 <MapPin className="h-5 w-5 text-red-500 mr-2" />
                                 <a
@@ -124,6 +232,12 @@ const RestaurantPage = () => {
                                     Xem trên bản đồ
                                 </a>
                             </div>
+                            {isAdmin && (
+                                <div className="flex items-center gap-2">
+                                    <MdModeEditOutline className="text-red-600 text-2xl cursor-pointer" onClick={() => setShowEditModal(true)} />
+                                    <TiDelete className="text-red-600 text-2xl cursor-pointer" onClick={() => setShowDeleteModal(true)} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -179,7 +293,7 @@ const RestaurantPage = () => {
                                 {filteredMenu.map((item, index) => (
                                     <div key={index} className="flex gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors">
                                         <Link 
-                                            to={`/foods/${item.food}`} 
+                                            to={`/foods/${item.food._id}`} 
                                             className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg group"
                                         >
                                             <img 
@@ -229,6 +343,7 @@ const RestaurantPage = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 
