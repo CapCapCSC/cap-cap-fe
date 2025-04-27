@@ -3,15 +3,27 @@ import userService from "../services/userService";
 
 const AuthContext = createContext();
 
+// Add helper to check JWT expiration
+const isTokenExpired = (token) => {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.exp * 1000 < Date.now();
+    } catch {
+        return true;
+    }
+};
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Initialize user from localStorage
+    // Initialize user from localStorage with token expiration check
     useEffect(() => {
         const storedUser = userService.getCurrentUser();
-        if (storedUser) {
+        if (storedUser && storedUser.token && !isTokenExpired(storedUser.token)) {
             setUser(storedUser);
+        } else {
+            localStorage.removeItem('user');
         }
         setLoading(false);
     }, []);
@@ -24,6 +36,26 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         localStorage.removeItem('user');
     };
+
+    // Auto logout when token expires
+    useEffect(() => {
+        if (user && user.token) {
+            try {
+                const payload = JSON.parse(atob(user.token.split('.')[1]));
+                const expiryTime = payload.exp * 1000 - Date.now();
+                if (expiryTime > 0) {
+                    const timer = setTimeout(() => {
+                        logout();
+                    }, expiryTime);
+                    return () => clearTimeout(timer);
+                } else {
+                    logout();
+                }
+            } catch {
+                logout();
+            }
+        }
+    }, [user]);
 
     const updateUserProfile = async (userId, userData) => {
         try {

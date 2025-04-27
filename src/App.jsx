@@ -14,6 +14,7 @@ import FoodListPage from './pages/FoodListPage.jsx';
 import FoodDetailPage from './pages/FoodDetailPage.jsx'; 
 import ProfilePage from './pages/ProfilePage.jsx';
 import MapPage from './pages/MapPage.jsx';
+import UnderMaintenance from './pages/UnderMaintenance.jsx';
 
 function App() {
   return (
@@ -42,8 +43,12 @@ function App() {
           <Route path="/profiles/:id" element={<ProfilePage />} />
 
           {/* 404 */}
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="/*/*" element={<NotFoundPage />} />
           <Route path="/foods/undefined" element={<NotFoundPage />} />
+
+          {/* Under Maintenance */}
+          <Route path="*" element={<UnderMaintenance />} />
+
         </Routes>
       </AuthProvider>
     </Router>

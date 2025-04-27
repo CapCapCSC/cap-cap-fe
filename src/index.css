@@ -123,8 +123,6 @@
   font-family: 'Lobster', cursive;
 }
 
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
 
 /* Hide browser's default password reveal button */

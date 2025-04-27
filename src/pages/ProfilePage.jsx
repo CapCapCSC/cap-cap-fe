@@ -9,6 +9,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import userService from "@/services/userService";
+import CheckInHistory from "@/components/custom/ProfileTabs/CheckInHistory";
+import BadgesList from "@/components/custom/ProfileTabs/BadgesList";
+import VouchersList from "@/components/custom/ProfileTabs/VouchersList";
+import QuizHistory from "@/components/custom/ProfileTabs/QuizHistory";
 
 // Tab enum for better readability
 const TabType = {
@@ -50,69 +54,11 @@ const ProfilePage = () => {
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [newUsername, setNewUsername] = useState("");
 
-    // Mock data for now - will be replaced with API calls
-    const badges = [
-        { 
-            _id: "1", 
-            name: "Chuyên gia ẩm thực", 
-            iconUrl: "https://via.placeholder.com/100",
-            description: "Đánh giá 10 món ăn và viết review chi tiết"
-        },
-        { 
-            _id: "2", 
-            name: "Người mới", 
-            iconUrl: "https://via.placeholder.com/100",
-            description: "Đã tham gia hệ thống"
-        }
-    ];
-    
-    const vouchers = [
-        {
-            _id: "v1",
-            name: "Giảm giá 10%",
-            validUntil: "2025-12-31T23:59:59.000Z",
-            applicableRestaurants: [
-                {
-                    _id: "restaurantObjectId1",
-                    name: "Nhà hàng A"
-                }
-            ],
-            discountValue: 10,
-            used: false
-        }
-    ];
-    
-    const checkInsData = [
-        { id: 1, date: "01/01/2025", location: "Ăn tại quán A" },
-        { id: 2, date: "02/01/2025", location: "Ăn tại quán X" }
-    ];
-    
-    const quizHistory = [
-        {
-            _id: "q1",
-            quizId: "quiz123",
-            userId: "user456",
-            score: 8,
-            correctAnswers: 8,
-            totalQuestions: 10,
-            timeSpent: 300,
-            startedAt: "2024-04-24T10:00:00.000Z",
-            completedAt: "2024-04-24T10:05:00.000Z",
-            status: "completed",
-            answers: [
-                {
-                    questionId: "question1",
-                    selectedAnswer: "Paris",
-                    isCorrect: true,
-                    timeSpent: 30
-                }
-            ],
-            rewards: {
-                badge: "1",
-                voucher: "v1"
-            }
-        }
-    ];
+    // Removed mock data arrays and added state hooks for API data
+    const [badges, setBadges] = useState([]);
+    const [vouchers, setVouchers] = useState([]);
+    const [checkInsData, setCheckInsData] = useState([]);
+    const [quizHistory, setQuizHistory] = useState([]);
 
     const isOwnProfile = currentUser && currentUser.id === id;
 
@@ -128,6 +74,10 @@ const ProfilePage = () => {
                     avatar: userData.avatar,
                 });
                 setNewUsername(userData.username);
+                setBadges(userData.badges || []);
+                setVouchers(userData.vouchers || []);
+                setCheckInsData(userData.checkIns || userData.checkInsData || []);
+                setQuizHistory(userData.quizHistory || []);
             } catch (error) {
                 toast.error(error.message || "Failed to fetch user data");
                 console.error("Error fetching user:", error);
@@ -343,208 +293,18 @@ const ProfilePage = () => {
         }
     };
 
-    // Render check-in history content
-    const renderCheckInHistory = () => (
-        <div className="relative">
-            {/* Vertical line */}
-            <div className="absolute left-[5.5rem] top-0 bottom-0 w-1 bg-gray-200"></div>
-            
-            {/* Check-in items */}
-            <div className="space-y-6">
-                {checkInsData.map((checkIn) => (
-                    <div key={checkIn.id} className="flex items-center gap-4">
-                        <div className="w-24 text-sm text-gray-600">{checkIn.date}</div>
-                        <div 
-                            onClick={() => handleCheckInClick(checkIn.id)}
-                            className={`w-6 h-6 rounded-full z-10 flex items-center justify-center cursor-pointer transition-colors duration-200 ${activeCheckInId === checkIn.id ? 'bg-red-500' : 'bg-gray-300 hover:bg-gray-400'}`}
-                        ></div>
-                        <div className="flex-1">
-                            {activeCheckInId === checkIn.id && 
-                                <div className="text-md transition-opacity duration-200">{checkIn.location}</div>
-                            }
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-    
-    // Render badges content
-    const renderBadges = () => (
-        <div className="py-4">
-            <h3 className="text-lg font-medium mb-4">Huy hiệu của bạn</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {badges.map(badge => (
-                    <div key={badge._id} className="flex flex-col items-center">
-                        <div 
-                            className="w-20 h-20 rounded-full overflow-hidden mb-2 shadow-md cursor-pointer transform hover:scale-105 transition-transform duration-200"
-                            onClick={() => handleBadgeClick(badge)}
-                        >
-                            <img 
-                                src={badge.iconUrl} 
-                                alt={badge.name}
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                        <span className="text-sm">{badge.name}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-    
-    // Render vouchers content
-    const renderVouchers = () => (
-        <div className="py-4">
-            <h3 className="text-lg font-medium mb-4">Voucher của bạn</h3>
-            <div className="space-y-4">
-                {vouchers.map(voucher => {
-                    // Format the date
-                    const validUntil = new Date(voucher.validUntil);
-                    const formattedDate = validUntil.toLocaleDateString('vi-VN');
-                    
-                    return (
-                        <div 
-                            key={voucher._id} 
-                            className="border border-gray-200 rounded-lg p-4 flex justify-between items-center hover:bg-gray-50 transition-colors cursor-pointer"
-                            onClick={() => handleVoucherClick(voucher)}
-                        >
-                            <div>
-                                <h4 className="font-medium">{voucher.name}</h4>
-                                <p className="text-sm text-gray-500">
-                                    Áp dụng tại: {voucher.applicableRestaurants.map(r => r.name).join(', ')}
-                                </p>
-                                <p className="text-sm text-gray-500">Hết hạn: {formattedDate}</p>
-                            </div>
-                            
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-    
-    // Render quiz history content
-    const renderQuizHistory = () => {
-        // Calculate pagination indices
-        const startIndex = (quizCurrentPage - 1) * quizItemsPerPage;
-        const endIndex = startIndex + quizItemsPerPage;
-        // Get current page items
-        const currentItems = quizHistory.slice(startIndex, endIndex);
-        
-        return (
-            <div className="py-4">
-                <h3 className="text-lg font-medium mb-4">Lịch sử làm quiz</h3>
-                <div className="space-y-4">
-                    {currentItems.map(quiz => {
-                        // Format dates
-                        const startDate = new Date(quiz.startedAt);
-                        const formattedDate = startDate.toLocaleDateString('vi-VN');
-                        const formattedTime = startDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-                        
-                        // Format time spent
-                        const minutes = Math.floor(quiz.timeSpent / 60);
-                        const seconds = quiz.timeSpent % 60;
-                        const formattedTimeSpent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                        
-                        // Get badge and voucher info
-                        const badge = badges.find(b => b._id === quiz.rewards.badge);
-                        const voucher = vouchers.find(v => v._id === quiz.rewards.voucher);
-                        
-                        return (
-                            <div key={quiz._id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                                <div className="flex justify-between">
-                                    <div>
-                                        <h4 className="font-medium">Quiz #{quiz.quizId.substring(4)}</h4>
-                                        <p className="text-sm text-gray-500">
-                                            {formattedDate} - {formattedTime}
-                                        </p>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-lg font-bold text-red-600">
-                                            {quiz.score}/{quiz.totalQuestions}
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                            Thời gian: {formattedTimeSpent}
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                {/* Rewards section */}
-                                {(badge || voucher) && (
-                                    <div className="mt-3 pt-3 border-t border-gray-100">
-                                        <p className="text-sm font-medium mb-2">Phần thưởng:</p>
-                                        <div className="flex items-center gap-3">
-                                            {badge && (
-                                                <div className="flex items-center gap-1">
-                                                    <img src={badge.iconUrl} alt={badge.name} className="w-6 h-6 rounded-full" />
-                                                    <span className="text-sm">{badge.name}</span>
-                                                </div>
-                                            )}
-                                            {voucher && (
-                                                <div 
-                                                    className="flex items-center gap-1 text-sm bg-blue-50 px-2 py-1 rounded-md cursor-pointer hover:bg-blue-100"
-                                                    onClick={() => handleVoucherClick(voucher)}
-                                                >
-                                                    <span>🎫</span>
-                                                    <span>{voucher.name}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-                
-                {/* Pagination */}
-                <div className="mt-6 flex justify-center">
-                    <div className="flex space-x-2">
-                        <button 
-                            onClick={() => handleQuizPageChange(quizCurrentPage > 1 ? quizCurrentPage - 1 : 1)}
-                            className={`px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-50 ${quizCurrentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                            disabled={quizCurrentPage === 1}
-                        >
-                            &laquo;
-                        </button>
-                        <button 
-                            onClick={() => handleQuizPageChange(1)}
-                            className={`px-3 py-1 border border-gray-300 rounded ${quizCurrentPage === 1 ? 'bg-red-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} cursor-pointer`}
-                        >
-                            1
-                        </button>
-                        <button 
-                            onClick={() => handleQuizPageChange(2)}
-                            className={`px-3 py-1 border border-gray-300 rounded ${quizCurrentPage === 2 ? 'bg-red-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'} cursor-pointer`}
-                        >
-                            2
-                        </button>
-                        <button 
-                            onClick={() => handleQuizPageChange(quizCurrentPage < totalQuizPages ? quizCurrentPage + 1 : totalQuizPages)}
-                            className={`px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-50 ${quizCurrentPage === totalQuizPages ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                            disabled={quizCurrentPage === totalQuizPages}
-                        >
-                            &raquo;
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-    
-    // Render active tab content
+    // Removed inline renderCheckInHistory, renderBadges, renderVouchers, renderQuizHistory and replaced with component-based rendering
     const renderActiveTabContent = () => {
         switch (activeTab) {
-            case TabType.BADGES:
-                return renderBadges();
-            case TabType.VOUCHERS:
-                return renderVouchers();
-            case TabType.QUIZ:
-                return renderQuizHistory();
             case TabType.CHECKIN:
+                return <CheckInHistory checkInsData={checkInsData} activeCheckInId={activeCheckInId} handleCheckInClick={handleCheckInClick} />;
+            case TabType.BADGES:
+                return <BadgesList badges={badges} handleBadgeClick={handleBadgeClick} />;
+            case TabType.VOUCHERS:
+                return <VouchersList vouchers={vouchers} handleVoucherClick={handleVoucherClick} />;
+            case TabType.QUIZ:
             default:
-                return renderCheckInHistory();
+                return <QuizHistory quizHistory={quizHistory} badges={badges} vouchers={vouchers} quizCurrentPage={quizCurrentPage} quizItemsPerPage={quizItemsPerPage} totalQuizPages={totalQuizPages} handleQuizPageChange={handleQuizPageChange} handleVoucherClick={handleVoucherClick} />;
         }
     };
 
