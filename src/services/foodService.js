@@ -1,5 +1,7 @@
 import API from "./api";
 
+const API_URL = "http://localhost:3000/api";
+
 export const getRandomFoods = async () => {
     const response = await API.get("/foods/random");
     return response.data;
@@ -15,7 +17,7 @@ export const getFoods = async (page = 1, limit = 10, tags) => {
 export const getFoodById = async (id) => {
     const response = await API.get(`/foods/${id}`);
     return response.data;
-}; 
+};
 
 export const editFood = async (id, foodData) => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -42,5 +44,14 @@ export const createFood = async (foodData) => {
     }
     const response = await API.post('/foods', foodData);
     return response.data;
+};
+
+export const getAllFoods = async () => {
+    try {
+        const response = await API.get('/foods');
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.message || "Failed to fetch foods";
+    }
 };
 

@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { authService } from "@/services/authService";
+import API from "@/services/api";
 
-const ForgotPasswordCard = ({ email, setEmail, onSubmit }) => {
+const ForgotPasswordCard = ({ email, setEmail, onSubmit, isLoading }) => {
     return (
         <div className="mt-44 w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
             <div className="text-center">
@@ -32,6 +34,7 @@ const ForgotPasswordCard = ({ email, setEmail, onSubmit }) => {
                     <button
                         type="submit"
                         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        disabled={isLoading}
                     >
                         Gửi liên kết đặt lại mật khẩu
                     </button>
@@ -49,27 +52,38 @@ const ForgotPasswordCard = ({ email, setEmail, onSubmit }) => {
 
 const ForgotPasswordPage = () => {
     const [email, setEmail] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Here you would implement your API call to send reset email
-        // For now, we'll simulate it with a toast message
+        if (!email) {
+            toast.error("Vui lòng nhập email của bạn");
+            return;
+        }
         
-        toast.success(
-            "Liên kết đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư và làm theo hướng dẫn.",
-            {
-                duration: 5000
-            }
-        );
-        
-        // In a real application, we might want to stay on this page
-        // instead of redirecting immediately, since the user needs to
-        // check their email. But for demo purposes we'll redirect after delay
-        setTimeout(() => {
-            navigate("/login");
-        }, 5000);
+        try {
+            setIsLoading(true);
+            await authService.forgotPassword(email);
+            
+            toast.success(
+                "Liên kết đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư và làm theo hướng dẫn.",
+                {
+                    duration: 5000
+                }
+            );
+            
+            // Redirect to login page after a delay
+            setTimeout(() => {
+                navigate("/login");
+            }, 5000);
+        } catch (error) {
+            console.error("Error sending reset password email:", error);
+            toast.error(error.message || "Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại sau.");
+        } finally {
+            setIsLoading(false);
+        }
     };
     
     return (
@@ -78,9 +92,11 @@ const ForgotPasswordPage = () => {
                 <ForgotPasswordCard 
                     email={email} 
                     setEmail={setEmail} 
-                    onSubmit={handleSubmit} 
+                    onSubmit={handleSubmit}
+                    isLoading={isLoading}
                 />
             </div>
+            
             <Toaster />
         </div>
     );
