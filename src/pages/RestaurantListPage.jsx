@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, MapPin, Filter, ChevronDown, X } from "lucide-react";
+import { Search, MapPin, Filter, ChevronDown, X, Plus, Trash2 } from "lucide-react";
 import HCMMap from "@/components/custom/HCMMap";
 import { getRestaurants, createRestaurant } from "@/services/restaurantService";
+import { getAllFoods } from "@/services/foodService";
 import { IoMdAddCircle } from "react-icons/io";
 import { useAdmin } from "../context/AdminContext";
 import {
@@ -57,6 +58,9 @@ const RestaurantListPage = () => {
         locationUrl: "",
         menu: [{ food: "", price: 0 }],
     });
+    const [foods, setFoods] = useState([]);
+    const [loadingFoods, setLoadingFoods] = useState(false);
+    const [foodError, setFoodError] = useState(null);
 
     useEffect(() => {
         const fetchRestaurants = async () => {
@@ -75,6 +79,47 @@ const RestaurantListPage = () => {
 
         fetchRestaurants();
     }, [currentPage, selectedDistrict]);
+
+    useEffect(() => {
+        const fetchAllFoods = async () => {
+            if (showAddModal) {
+                try {
+                    setLoadingFoods(true);
+                    setFoodError(null);
+                    
+                    // Lấy trang đầu tiên để biết tổng số món
+                    const firstPage = await getAllFoods(1, 10);
+                    if (!firstPage || !firstPage.pagination) {
+                        throw new Error("Không thể tải danh sách món ăn");
+                    }
+
+                    const { total } = firstPage.pagination;
+                    const totalPages = Math.ceil(total / 10);
+                    let allFoods = [...firstPage.data];
+
+                    // Lấy các trang còn lại
+                    const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+                    const promises = remainingPages.map(page => getAllFoods(page, 10));
+                    
+                    const results = await Promise.all(promises);
+                    results.forEach(result => {
+                        if (result && Array.isArray(result.data)) {
+                            allFoods = [...allFoods, ...result.data];
+                        }
+                    });
+
+                    setFoods(allFoods);
+                } catch (error) {
+                    console.error("Error fetching foods:", error);
+                    setFoodError(error.message || "Không thể tải danh sách món ăn");
+                } finally {
+                    setLoadingFoods(false);
+                }
+            }
+        };
+
+        fetchAllFoods();
+    }, [showAddModal]);
 
     const { isAdmin } = useAdmin();
 
@@ -198,27 +243,108 @@ const RestaurantListPage = () => {
                             <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={newRestaurant.locationUrl} onChange={(e) => setNewRestaurant({ ...newRestaurant, locationUrl: e.target.value })}/>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Thực đơn</label>
-                            {newRestaurant.menu.map((item, index) => (
-                                <div key={index} className="flex gap-2 mb-2">
-                                    <input type="text" placeholder="Food ID" className="flex-1 border border-gray-300 rounded px-3 py-2" value={item.food} onChange={(e) => {
-                                        const menuCopy = [...newRestaurant.menu];
-                                        menuCopy[index].food = e.target.value;
-                                        setNewRestaurant({ ...newRestaurant, menu: menuCopy });
-                                    }}/>
-                                    <input type="number" placeholder="Price" className="w-24 border border-gray-300 rounded px-3 py-2" value={item.price} onChange={(e) => {
-                                        const menuCopy = [...newRestaurant.menu];
-                                        menuCopy[index].price = Number(e.target.value);
-                                        setNewRestaurant({ ...newRestaurant, menu: menuCopy });
-                                    }}/>
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="block text-sm font-medium text-gray-700">Thực đơn</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setNewRestaurant({ 
+                                        ...newRestaurant, 
+                                        menu: [...newRestaurant.menu, { food: "", price: 0 }] 
+                                    })}
+                                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Thêm món
+                                </button>
+                            </div>
+                            
+                            {loadingFoods ? (
+                                <div className="text-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
+                                    <p className="mt-2 text-sm text-gray-500">Đang tải danh sách món ăn...</p>
                                 </div>
-                            ))}
-                            <button type="button" onClick={() => setNewRestaurant({ ...newRestaurant, menu: [ ...newRestaurant.menu, { food: "", price: 0 } ] })} className="cursor-pointer text-sm text-blue-600 hover:underline">Thêm món</button>
+                            ) : foodError ? (
+                                <div className="text-center py-4">
+                                    <p className="text-red-500 mb-2">{foodError}</p>
+                                    <button 
+                                        onClick={() => {
+                                            setLoadingFoods(true);
+                                            setFoodError(null);
+                                            getAllFoods()
+                                                .then(data => {
+                                                    if (Array.isArray(data)) {
+                                                        setFoods(data);
+                                                    } else if (data && Array.isArray(data.data)) {
+                                                        setFoods(data.data);
+                                                    }
+                                                })
+                                                .catch(error => {
+                                                    setFoodError(error.message || "Không thể tải danh sách món ăn");
+                                                })
+                                                .finally(() => {
+                                                    setLoadingFoods(false);
+                                                });
+                                        }}
+                                        className="text-sm text-blue-600 hover:text-blue-700"
+                                    >
+                                        Thử lại
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {newRestaurant.menu.map((item, index) => (
+                                        <div key={index} className="flex gap-2 items-start">
+                                            <div className="flex-1">
+                                                <select 
+                                                    className="w-full border border-gray-300 rounded px-3 py-2"
+                                                    value={item.food}
+                                                    onChange={(e) => {
+                                                        const menuCopy = [...newRestaurant.menu];
+                                                        menuCopy[index].food = e.target.value;
+                                                        setNewRestaurant({ ...newRestaurant, menu: menuCopy });
+                                                    }}
+                                                >
+                                                    <option value="">Chọn món ăn</option>
+                                                    {foods.map((food) => (
+                                                        <option key={food._id} value={food._id}>
+                                                            {food.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="w-32">
+                                                <input 
+                                                    type="number" 
+                                                    placeholder="Giá" 
+                                                    className="w-full border border-gray-300 rounded px-3 py-2" 
+                                                    value={item.price} 
+                                                    onChange={(e) => {
+                                                        const menuCopy = [...newRestaurant.menu];
+                                                        menuCopy[index].price = Number(e.target.value);
+                                                        setNewRestaurant({ ...newRestaurant, menu: menuCopy });
+                                                    }}
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const menuCopy = [...newRestaurant.menu];
+                                                    menuCopy.splice(index, 1);
+                                                    setNewRestaurant({ ...newRestaurant, menu: menuCopy });
+                                                }}
+                                                className="p-2 text-red-600 hover:text-red-700"
+                                            >
+                                                <Trash2 className="h-5 w-5" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="mt-6 flex justify-end">
                         <button type="button" onClick={() => setShowAddModal(false)} className="cursor-pointer px-4 py-2 bg-gray-200 rounded mr-2">Hủy</button>
-                        <button type="button" onClick={handleAddRestaurant} className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded">Tạo</button>
+                        <button type="button" onClick={handleAddRestaurant} className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded" disabled={loadingFoods || foodError}>Tạo</button>
                     </div>
                 </div>
             </div>
