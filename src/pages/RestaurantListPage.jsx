@@ -5,6 +5,14 @@ import HCMMap from "@/components/custom/HCMMap";
 import { getRestaurants, createRestaurant } from "@/services/restaurantService";
 import { IoMdAddCircle } from "react-icons/io";
 import { useAdmin } from "../context/AdminContext";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+  } from "@/components/ui/pagination"
 
 const districts = [
     { id: "all", name: "Tất cả quận" },
@@ -35,10 +43,13 @@ const RestaurantListPage = () => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
-    const [viewMode, setViewMode] = useState("grid"); // grid or map
+    const [viewMode, setViewMode] = useState("grid");
     const [restaurants, setRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const itemsPerPage = 6;
     const [newRestaurant, setNewRestaurant] = useState({
         name: "",
         imageUrl: "",
@@ -50,8 +61,11 @@ const RestaurantListPage = () => {
     useEffect(() => {
         const fetchRestaurants = async () => {
             try {
-                const response = await getRestaurants();
+                setLoading(true);
+                const response = await getRestaurants(currentPage, itemsPerPage, selectedDistrict !== "all" ? selectedDistrict : undefined);
+                const { total, limit } = response.pagination;
                 setRestaurants(response.data);
+                setTotalPages(Math.ceil(total / limit));
                 setLoading(false);
             } catch (error) {
                 console.error(error);
@@ -60,7 +74,7 @@ const RestaurantListPage = () => {
         };
 
         fetchRestaurants();
-    }, []);
+    }, [currentPage, selectedDistrict]);
 
     const { isAdmin } = useAdmin();
 
@@ -80,6 +94,14 @@ const RestaurantListPage = () => {
         } catch (error) {
             console.error(error);
         }
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) setCurrentPage(p => p - 1);
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(p => p + 1);
     };
 
     // Show spinner while loading
@@ -370,6 +392,39 @@ const RestaurantListPage = () => {
                         )}
                     </div>
                 )}
+
+                {/* Pagination */}
+                <div className="mt-8">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious 
+                                    onClick={handlePreviousPage} 
+                                    disabled={currentPage === 1}
+                                    className="cursor-pointer hover:bg-red-100 hover:text-red-600"
+                                />
+                            </PaginationItem>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                <PaginationItem className="cursor-pointer" key={page}>
+                                    <PaginationLink 
+                                        onClick={() => setCurrentPage(page)}
+                                        isActive={currentPage === page}
+                                        className={currentPage === page ? "bg-red-600 text-white hover:bg-red-700" : "hover:bg-red-100 hover:text-red-600"}
+                                    >
+                                        {page}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            ))}
+                            <PaginationItem>
+                                <PaginationNext 
+                                    onClick={handleNextPage} 
+                                    disabled={currentPage === totalPages}
+                                    className="cursor-pointer hover:bg-red-100 hover:text-red-600"
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
             </div>
         </div>
         </>

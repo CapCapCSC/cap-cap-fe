@@ -5,9 +5,13 @@ export const getRestaurantById = async (id) => {
     return response.data;
 };
 
-export const getRestaurants = async (districtId) => {
+export const getRestaurants = async (page = 1, limit = 10, districtId) => {
     const response = await API.get("/restaurants", {
-        params: districtId ? { districtId } : {},
+        params: {
+            page,
+            limit,
+            ...(districtId ? { districtId } : {}),
+        },
     });
     return response.data;
 };
