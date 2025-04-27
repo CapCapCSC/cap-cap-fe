@@ -13,6 +13,7 @@ import CheckInHistory from "@/components/custom/ProfileTabs/CheckInHistory";
 import BadgesList from "@/components/custom/ProfileTabs/BadgesList";
 import VouchersList from "@/components/custom/ProfileTabs/VouchersList";
 import QuizHistory from "@/components/custom/ProfileTabs/QuizHistory";
+import { uploadAvatar } from "@/services/avatarService";
 
 // Tab enum for better readability
 const TabType = {
@@ -211,18 +212,50 @@ const ProfilePage = () => {
             reader.readAsDataURL(file);
         }
     };
+
     
     // Handle confirm avatar change
-    const handleConfirmAvatarChange = () => {
+    const handleConfirmAvatarChange = async () => {
         if (previewAvatar) {
-            setUser(prevUser => ({
-                ...prevUser,
-                avatar: previewAvatar
-            }));
+            const loadingToastId = toast.loading("Đang tải ảnh đại diện lên..."); // lấy toastId
+
+            try {
+                // Lấy file từ fileInputRef
+                const file = fileInputRef.current.files[0];
+                if (!file) {
+                    toast.dismiss(loadingToastId);
+                    toast.error("Không tìm thấy file ảnh");
+                    return;
+                }
+
+                // Gửi file avatar lên server
+                const response = await uploadAvatar(id, file);
+                
+                // Cập nhật state user với URL avatar mới từ server
+                setUser(prevUser => ({
+                    ...prevUser,
+                    avatar: response.user?.avatar || response.avatar
+                }));
+
+                // Cập nhật AuthContext để đảm bảo thông tin người dùng được cập nhật toàn cục
+                if (isOwnProfile && currentUser) {
+                    await updateUserProfile(id, { 
+                        avatar: response.user?.avatar || response.avatar 
+                    });
+                }
+
+                toast.dismiss(loadingToastId); // tắt loading khi thành công
+                toast.success("Ảnh đại diện đã được cập nhật thành công");
+            } catch (error) {
+                toast.dismiss(loadingToastId); // tắt loading nếu có lỗi
+                toast.error(error.message || "Cập nhật ảnh đại diện thất bại");
+                console.error("Lỗi cập nhật ảnh đại diện:", error);
+            }
         }
         setIsAvatarModalOpen(false);
         setPreviewAvatar(null);
     };
+
     
     // Handle cancel avatar change
     const handleCancelAvatarChange = () => {
@@ -351,13 +384,13 @@ const ProfilePage = () => {
                                         <button
                                             type="button"
                                             onClick={handleUsernameEditCancel}
-                                            className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                                            className="cursor-pointer px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
                                         >
                                             Hủy
                                         </button>
                                         <button
                                             type="submit"
-                                            className="px-3 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
+                                            className="cursor-pointer px-3 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700"
                                         >
                                             Lưu
                                         </button>
@@ -480,7 +513,7 @@ const ProfilePage = () => {
                                 />
                                 <button 
                                     onClick={() => fileInputRef.current.click()}
-                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                                    className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
                                 >
                                     Chọn ảnh
                                 </button>
@@ -490,13 +523,13 @@ const ProfilePage = () => {
                         <div className="flex justify-end gap-3 mt-6">
                             <button 
                                 onClick={handleCancelAvatarChange}
-                                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                                className="cursor-pointer px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
                             >
                                 Hủy
                             </button>
                             <button 
                                 onClick={handleConfirmAvatarChange}
-                                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                                className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
                                 disabled={!previewAvatar}
                             >
                                 Đồng ý
