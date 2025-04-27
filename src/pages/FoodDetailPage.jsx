@@ -186,32 +186,32 @@ const FoodDetailPage = () => {
         <div className="fixed inset-0 bg-gray-500/30 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 w-full max-w-md relative">
             <button onClick={() => setShowEditModal(false)} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">&times;</button>
-            <h2 className="text-xl font-bold mb-4">Edit Food</h2>
+            <h2 className="text-xl font-bold mb-4">Sửa món ăn</h2>
             {editError && <p className="text-red-500 mb-2">{editError}</p>}
             <form onSubmit={handleEditSubmit}>
               <div className="mb-2">
-                <label className="block mb-1">Name</label>
+                <label className="block mb-1">Tên món ăn</label>
                 <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="w-full border px-3 py-2 rounded" required />
               </div>
               <div className="mb-2">
-                <label className="block mb-1">Description</label>
+                <label className="block mb-1">Mô tả</label>
                 <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)} className="w-full border px-3 py-2 rounded" required />
               </div>
               <div className="mb-2">
-                <label className="block mb-1">Ingredients (comma separated)</label>
+                <label className="block mb-1">Nguyên liệu (cách nhau bởi dấu phẩy)</label>
                 <input type="text" value={editIngredients} onChange={e => setEditIngredients(e.target.value)} className="w-full border px-3 py-2 rounded" />
               </div>
               <div className="mb-2">
-                <label className="block mb-1">Image URL</label>
+                <label className="block mb-1">Link ảnh</label>
                 <input type="text" value={editImgUrl} onChange={e => setEditImgUrl(e.target.value)} className="w-full border px-3 py-2 rounded" />
               </div>
               <div className="mb-2">
-                <label className="block mb-1">Tags (comma separated tag IDs)</label>
+                <label className="block mb-1">Tags (cách nhau bởi dấu phẩy)</label>
                 <input type="text" value={editTags} onChange={e => setEditTags(e.target.value)} className="w-full border px-3 py-2 rounded" />
               </div>
               <div className="mt-4 flex justify-end space-x-2">
-                <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 rounded border">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-red-600 text-white rounded">Save</button>
+                <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 rounded border">Hủy</button>
+                <button type="submit" className="px-4 py-2 bg-red-600 text-white rounded">Lưu</button>
               </div>
             </form>
           </div>

@@ -160,7 +160,7 @@ const RestaurantListPage = () => {
                             <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={newRestaurant.name} onChange={(e) => setNewRestaurant({ ...newRestaurant, name: e.target.value })}/>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Ảnh URL</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">URL Ảnh</label>
                             <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={newRestaurant.imageUrl} onChange={(e) => setNewRestaurant({ ...newRestaurant, imageUrl: e.target.value })}/>
                         </div>
                         <div>
@@ -172,11 +172,11 @@ const RestaurantListPage = () => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Location URL</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">URL Địa chỉ</label>
                             <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={newRestaurant.locationUrl} onChange={(e) => setNewRestaurant({ ...newRestaurant, locationUrl: e.target.value })}/>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Menu</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Thực đơn</label>
                             {newRestaurant.menu.map((item, index) => (
                                 <div key={index} className="flex gap-2 mb-2">
                                     <input type="text" placeholder="Food ID" className="flex-1 border border-gray-300 rounded px-3 py-2" value={item.food} onChange={(e) => {

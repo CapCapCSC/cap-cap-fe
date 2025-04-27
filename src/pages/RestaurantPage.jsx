@@ -127,11 +127,11 @@ const RestaurantPage = () => {
                     <h2 className="text-xl font-semibold mb-4">Chỉnh sửa quán ăn</h2>
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Tên quán ắn</label>
+                            <label className="block text-sm font-medium text-gray-700">Tên quán ăn</label>
                             <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={editData.name} onChange={(e) => setEditData({ ...editData, name: e.target.value })} />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Ảnh URL</label>
+                            <label className="block text-sm font-medium text-gray-700">URL ảnh</label>
                             <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={editData.imageUrl} onChange={(e) => setEditData({ ...editData, imageUrl: e.target.value })} />
                         </div>
                         <div>
@@ -139,11 +139,11 @@ const RestaurantPage = () => {
                             <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={editData.district} onChange={(e) => setEditData({ ...editData, district: e.target.value })} />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Location URL</label>
+                            <label className="block text-sm font-medium text-gray-700">URL Địa chỉ</label>
                             <input type="text" className="w-full border border-gray-300 rounded px-3 py-2" value={editData.locationUrl} onChange={(e) => setEditData({ ...editData, locationUrl: e.target.value })} />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Menu</label>
+                            <label className="block text-sm font-medium text-gray-700">Thực đơn</label>
                             {editData.menu.map((item, idx) => (
                                 <div key={idx} className="flex gap-2 items-center mb-2">
                                     <span className="flex-1">{item.food.name}</span>
